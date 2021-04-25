@@ -1,2 +1,3 @@
 # ozon_best_price_bot
-Bot for getting best price for product presented in excel file
+Bot for getting best price of product presented in ozon
+Data storing & reading via Google sheets
