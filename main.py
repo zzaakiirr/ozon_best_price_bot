@@ -47,4 +47,6 @@ if __name__ == '__main__':
             'red': 30.0,
         }
     })
+
+    # Add pause after program execution
     input()
