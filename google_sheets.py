@@ -53,7 +53,7 @@ class OzonSheetRedactor:
         FIRST_CELL_LETTER = 'A'
         LAST_CELL_LETTER = 'D'
 
-        current_index = self.start_index
+        current_index = self.start_index - 1
         price_cells_range = f'{self.current_price_col}{self.start_index}:' \
                             f'{self.best_price_col}{self.end_index}'
 
@@ -62,6 +62,7 @@ class OzonSheetRedactor:
         price_table = self.sheet.get(price_cells_range)
 
         for price_row in price_table:
+            current_index += 1
 
             if len(price_row) < 2:
                 continue
@@ -69,11 +70,12 @@ class OzonSheetRedactor:
             current_price = self.__price_to_int(price_row[0])
             best_price = self.__price_to_int(price_row[1])
 
+            if not current_price or not best_price:
+                continue
+
             if current_price > best_price:
                 cell_range = f'{FIRST_CELL_LETTER}{current_index}:{LAST_CELL_LETTER}{current_index}'
                 self.sheet.format(cell_range, formatting)
-
-            current_index += 1
 
         print('[SUCCESS] Done!\n')
 
@@ -85,4 +87,9 @@ class OzonSheetRedactor:
         return sh.sheet1
 
     def __price_to_int(self, price):
-        return float(price.split('\xa0')[0])
+        print(f'price: {price}')
+        try:
+            result = float(price.split('\xa0')[0])
+        except ValueError:
+            print('here')
+        return result

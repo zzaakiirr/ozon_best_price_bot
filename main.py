@@ -1,6 +1,6 @@
-from parser import OzonParser
-from google_sheets import OzonSheetRedactor, START_INDEX
-from helpers import parse_html_as_soup
+import ozon_parser
+import google_sheets
+import helpers
 
 
 """
@@ -13,7 +13,7 @@ Returns 2d array containing current price & best price for each URL
                2nd product has current price = 3 and best price = 4
 """
 def get_product_prices(product_urls):
-    parser = OzonParser()
+    parser = ozon_parser.OzonParser()
     prices = []
 
     for product_url in product_urls:
@@ -23,7 +23,7 @@ def get_product_prices(product_urls):
 
       print(product_url)
 
-      soup = parse_html_as_soup(product_url)
+      soup = helpers.parse_html_as_soup(product_url)
       current_price = parser.find_current_price(soup)
       best_price = parser.find_best_price(soup)
 
@@ -35,7 +35,7 @@ def get_product_prices(product_urls):
 
 
 if __name__ == '__main__':
-    sheet_redactor = OzonSheetRedactor()
+    sheet_redactor = google_sheets.OzonSheetRedactor()
     product_urls = sheet_redactor.get_product_urls()
 
     product_prices = get_product_prices(product_urls)
@@ -47,3 +47,4 @@ if __name__ == '__main__':
             'red': 30.0,
         }
     })
+    input()
