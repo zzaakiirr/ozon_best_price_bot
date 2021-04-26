@@ -34,7 +34,7 @@ def get_product_prices(product_urls):
     return prices
 
 
-if __name__ == '__main__':
+def main():
     sheet_redactor = google_sheets.OzonSheetRedactor()
     product_urls = sheet_redactor.get_product_urls()
 
@@ -47,6 +47,10 @@ if __name__ == '__main__':
             'red': 30.0,
         }
     })
+
+
+if __name__ == '__main__':
+    main()
 
     # Add pause after program execution
     input()
