@@ -36,15 +36,24 @@ def get_product_prices(product_urls):
 
 def main():
     sheet_redactor = google_sheets.OzonSheetRedactor()
+
+    sheet_redactor.set_initial_formatting({
+        'backgroundColor': {
+            'red': 1,
+            'green': 1,
+            'blue': 1,
+        }
+    })
+
     product_urls = sheet_redactor.get_product_urls()
-
     product_prices = get_product_prices(product_urls)
-
     sheet_redactor.update_product_prices(product_prices)
 
     sheet_redactor.format_products_with_inefficient_price({
         'backgroundColor': {
-            'red': 30.0,
+            'red': 1,
+            'green': 1,
+            'blue': 0,
         }
     })
 

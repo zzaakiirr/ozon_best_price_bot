@@ -2,7 +2,7 @@ import gspread
 
 
 SERVICE_ACCOUNT_FILENAME = 'service_account.json'
-WORKBOOK_NAME = 'Ozon best price bot'
+WORKBOOK_NAME = 'Ozon best price bot v2'
 
 URLS_COL_NAME = 'B'
 CURRENT_PRICE_COL_NAME = 'C'
@@ -10,6 +10,9 @@ BEST_PRICE_COL_NAME = 'D'
 
 START_INDEX = 2
 END_INDEX = 1000000
+
+FIRST_CELL_LETTER = 'A'
+LAST_CELL_LETTER = 'D'
 
 
 class OzonSheetRedactor:
@@ -49,10 +52,14 @@ class OzonSheetRedactor:
     def update_product_prices(self, prices):
         self.sheet.update(f'{self.current_price_col}{self.start_index}', prices)
 
-    def format_products_with_inefficient_price(self, formatting):
-        FIRST_CELL_LETTER = 'A'
-        LAST_CELL_LETTER = 'D'
+    def set_initial_formatting(self, formatting):
+        cells_range = f'{FIRST_CELL_LETTER}{self.start_index}:{LAST_CELL_LETTER}{self.end_index}'
+        print(f'[INFO] Setting initial formatting {cells_range}...')
 
+        self.sheet.format(cells_range, formatting)
+        print('[SUCCESS] Done!\n')
+
+    def format_products_with_inefficient_price(self, formatting):
         current_index = self.start_index - 1
         price_cells_range = f'{self.current_price_col}{self.start_index}:' \
                             f'{self.best_price_col}{self.end_index}'
@@ -74,8 +81,8 @@ class OzonSheetRedactor:
                 continue
 
             if current_price > best_price:
-                cell_range = f'{FIRST_CELL_LETTER}{current_index}:{LAST_CELL_LETTER}{current_index}'
-                self.sheet.format(cell_range, formatting)
+                cells_range = f'{FIRST_CELL_LETTER}{current_index}:{LAST_CELL_LETTER}{current_index}'
+                self.sheet.format(cells_range, formatting)
 
         print('[SUCCESS] Done!\n')
 
