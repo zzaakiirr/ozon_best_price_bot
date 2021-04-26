@@ -6,6 +6,7 @@ import main
 
 SIDEBAR_BG_COLOR = '#323232'
 TEXT_BOX_BG_COLOR = '#1E1E1E'
+TEXT_BOX_FG_COLOR = '#FFFFFF'
 BUTTON_BG_COLOR = '#909090'
 
 BUTTON_SIZE = {
@@ -20,13 +21,18 @@ class GuiPresenter:
 
     # MARK: - Init
 
-    def __init__(self, start_button_text='Start', exit_button_text = 'Exit'):
+    def __init__(self, start_button_text='Start', exit_button_text='Exit'):
         self.window = tk.Tk()
+        self.window.configure(bg=SIDEBAR_BG_COLOR)
         self.window.resizable(False, False)
 
         self.sidebar_frame = tk.Frame(bg=SIDEBAR_BG_COLOR)
 
-        self.text_box = tk.Text(master=self.window, state='disabled', bg=TEXT_BOX_BG_COLOR)
+        self.text_box = tk.Text(master=self.window,
+                                state='disabled',
+                                bg=TEXT_BOX_BG_COLOR,
+                                fg=TEXT_BOX_FG_COLOR)
+
         sys.stdout = StdoutRedirector(self.text_box)
 
         self.start_button = tk.Button(self.sidebar_frame,
