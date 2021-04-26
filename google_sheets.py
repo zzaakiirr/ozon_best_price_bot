@@ -2,7 +2,7 @@ import gspread
 
 
 SERVICE_ACCOUNT_FILENAME = 'service_account.json'
-WORKBOOK_NAME = 'Ozon best price bot v2'
+WORKBOOK_NAME = 'Ozon best price bot'
 
 URLS_COL_NAME = 'B'
 CURRENT_PRICE_COL_NAME = 'C'
