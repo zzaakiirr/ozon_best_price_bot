@@ -17,19 +17,19 @@ def get_product_prices(product_urls):
     prices = []
 
     for product_url in product_urls:
+        print(product_url)
 
-      # if not product_url:
-      #   break
+        soup = helpers.parse_html_as_soup(product_url)
+        if not soup:
+            prices.append(['', ''])
+            return
 
-      print(product_url)
+        current_price = parser.find_current_price(soup)
+        best_price = parser.find_best_price(soup)
 
-      soup = helpers.parse_html_as_soup(product_url)
-      current_price = parser.find_current_price(soup)
-      best_price = parser.find_best_price(soup)
+        print(f'\t[INFO] Current price: {current_price}, Best price: {best_price}\n')
 
-      print(f'\t[INFO] Current price: {current_price}, Best price: {best_price}\n')
-
-      prices.append([current_price, best_price])
+        prices.append([current_price, best_price])
 
     return prices
 

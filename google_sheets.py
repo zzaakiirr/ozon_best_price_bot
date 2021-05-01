@@ -89,8 +89,12 @@ class OzonSheetRedactor:
     # MARK: - Private methods
 
     def __get_sheet(self, service_account_filename, workbook_name):
-        gc = gspread.service_account(filename=service_account_filename)
-        sh = gc.open(workbook_name)
+        try:
+            gc = gspread.service_account(filename=service_account_filename)
+            sh = gc.open(workbook_name)
+        except FileNotFoundError:
+            print(f"[ERROR] No such file '{service_account_filename}'")
+            print(f"[INFO] Добавьте файл '{service_account_filename}' в папку, где лежит программа")
         return sh.sheet1
 
     def __price_to_int(self, price):
