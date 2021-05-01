@@ -21,10 +21,9 @@ class GuiPresenter:
 
     # MARK: - Init
 
-    def __init__(self, start_button_text='Start', exit_button_text='Exit'):
+    def __init__(self, title='OzonBot', start_button_text='Start', exit_button_text='Exit'):
         self.window = tk.Tk()
-        self.window.configure(bg=SIDEBAR_BG_COLOR)
-        self.window.resizable(False, False)
+        self.__configure_window(title)
 
         self.sidebar_frame = tk.Frame(bg=SIDEBAR_BG_COLOR)
 
@@ -56,6 +55,11 @@ class GuiPresenter:
         self.window.mainloop()
 
     # MARK: - Private methods
+
+    def __configure_window(self, title):
+        self.window.title(title)
+        self.window.configure(bg=SIDEBAR_BG_COLOR)
+        self.window.resizable(False, False)
 
     def __pack_widgets(self, sidebar_side=tk.LEFT, text_side=tk.RIGHT):
         self.sidebar_frame.pack(side=sidebar_side)
