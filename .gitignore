@@ -1,3 +1,10 @@
 __pycache__/
+
+# Mac OS extensions
 .DS_Store
+
+# API key
 service_account.json
+
+# Environment
+venv/
