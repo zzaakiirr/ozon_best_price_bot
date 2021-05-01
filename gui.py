@@ -1,5 +1,6 @@
-import tkinter as tk
 import sys
+import threading
+import tkinter as tk
 
 import main
 
@@ -36,7 +37,7 @@ class GuiPresenter:
 
         self.start_button = tk.Button(self.sidebar_frame,
                                       text=start_button_text,
-                                      command=main.main,
+                                      command=lambda:self.__start_submit_thread(),
                                       width=BUTTON_SIZE['width'],
                                       height=BUTTON_SIZE['height'],
                                       bg=BUTTON_BG_COLOR)
@@ -66,6 +67,21 @@ class GuiPresenter:
         self.text_box.pack(side=text_side)
         self.start_button.pack(pady=VERTICAL_SPACE_BETWEEN_BUTTONS)
         self.exit_button.pack()
+
+    # MARK: - Threading
+
+    def __start_submit_thread(self):
+        self.submit_thread = threading.Thread(target=main.submit)
+        self.submit_thread.daemon = True
+        self.submit_thread.start()
+        self.window.after(20, self.__check_submit_thread)
+        self.start_button.configure(state='disable')
+
+    def __check_submit_thread(self):
+        if self.submit_thread.is_alive():
+            self.window.after(20, self.__check_submit_thread)
+        else:
+            self.start_button.configure(state='normal')
 
 
 class StdoutRedirector:
