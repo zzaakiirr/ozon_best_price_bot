@@ -2,7 +2,7 @@ import gspread
 
 
 SERVICE_ACCOUNT_FILENAME = 'service_account.json'
-WORKBOOK_NAME = 'Ozon best price bot'
+WORKBOOK_NAME = 'Ozon best price bot v2'
 
 URLS_COL_NAME = 'B'
 CURRENT_PRICE_COL_NAME = 'C'
@@ -13,6 +13,22 @@ END_INDEX = 1000000
 
 FIRST_CELL_LETTER = 'A'
 LAST_CELL_LETTER = 'D'
+
+INEFFICIENT_PRICE_FORMATTING = {
+    'backgroundColor': {
+        'red': 1,
+        'green': 1,
+        'blue': 0,
+    }
+}
+
+ERROR_PRICE_FORMATTING = {
+    'backgroundColor': {
+        'red': 1,
+        'green': 0,
+        'blue': 0.3,
+    }
+}
 
 
 class OzonSheetRedactor:
@@ -26,14 +42,20 @@ class OzonSheetRedactor:
                  current_price_col=CURRENT_PRICE_COL_NAME,
                  best_price_col=BEST_PRICE_COL_NAME,
                  start_index=START_INDEX,
-                 end_index=END_INDEX):
+                 end_index=END_INDEX,
+                 inefficient_price_formatting=INEFFICIENT_PRICE_FORMATTING,
+                 error_price_formatting=ERROR_PRICE_FORMATTING):
 
         self.urls_col = urls_col
         self.current_price_col = current_price_col
         self.best_price_col = best_price_col
 
         self.start_index = start_index
+        self.current_index = start_index
         self.end_index = end_index
+
+        self.inefficient_price_formatting = inefficient_price_formatting
+        self.error_price_formatting = error_price_formatting
 
         self.sheet = self.__get_sheet(service_account_filename, workbook_name)
 
@@ -49,40 +71,43 @@ class OzonSheetRedactor:
         print('[SUCCESS] Done!\n')
         return list(map(lambda url_row: url_row[0] if len(url_row) else None, url_table))
 
-    def update_product_prices(self, prices):
-        self.sheet.update(f'{self.current_price_col}{self.start_index}', prices)
+    def update_product_prices(self, prices, update_formatting=True):
+        try:
+            price_cell_range = f'{self.current_price_col}{self.current_index}:' \
+                               f'{self.best_price_col}{self.current_index + 1}'
+            self.sheet.update(price_cell_range, prices)
+
+            if update_formatting:
+                current_row_cell_range = f'{FIRST_CELL_LETTER}{self.current_index}:'\
+                                         f'{LAST_CELL_LETTER}{self.current_index}'
+                self.update_formatting(current_row_cell_range, prices)
+        except Exception as e:
+            print(f'[ERROR] Unexpected error: {e}')
+        self.current_index += 1
 
     def set_initial_formatting(self, formatting):
-        cells_range = f'{FIRST_CELL_LETTER}{self.start_index}:{LAST_CELL_LETTER}{self.end_index}'
-        print(f'[INFO] Setting initial formatting {cells_range}...')
+        cell_range = f'{FIRST_CELL_LETTER}{self.start_index}:{LAST_CELL_LETTER}{self.end_index}'
+        print(f'[INFO] Setting initial formatting {cell_range}...')
 
-        self.sheet.format(cells_range, formatting)
+        self.sheet.format(cell_range, formatting)
         print('[SUCCESS] Done!\n')
 
-    def format_products_with_inefficient_price(self, formatting):
-        current_index = self.start_index - 1
-        price_cells_range = f'{self.current_price_col}{self.start_index}:' \
-                            f'{self.best_price_col}{self.end_index}'
+    def update_formatting(self, cell_range, prices):
+        print(f'[INFO] Formatting cells {cell_range}...')
 
-        print(f'[INFO] Formatting cells {price_cells_range}...')
+        if not prices:
+            self.sheet.format(cell_range, self.error_price_formatting)
+            return
 
-        price_table = self.sheet.get(price_cells_range)
+        prices = prices[0]
+        current_price = int(prices[0]) if prices[0] else None
+        best_price = int(prices[1]) if prices[1] else None
 
-        for price_row in price_table:
-            current_index += 1
+        if not current_price or not best_price:
+            return
 
-            if len(price_row) < 2:
-                continue
-
-            current_price = self.__price_to_int(price_row[0])
-            best_price = self.__price_to_int(price_row[1])
-
-            if not current_price or not best_price:
-                continue
-
-            if current_price > best_price:
-                cells_range = f'{FIRST_CELL_LETTER}{current_index}:{LAST_CELL_LETTER}{current_index}'
-                self.sheet.format(cells_range, formatting)
+        if current_price > best_price:
+            self.sheet.format(cell_range, self.inefficient_price_formatting)
 
         print('[SUCCESS] Done!\n')
 

@@ -12,24 +12,23 @@ Returns 2d array containing current price & best price for each URL
     means that 1st product has current price = 1 and best price = 2
                2nd product has current price = 3 and best price = 4
 """
-def get_product_prices(product_urls):
+def get_product_prices(product_url):
     parser = ozon_parser.OzonParser()
     prices = []
 
-    for product_url in product_urls:
-        print(product_url)
+    print(product_url)
 
-        soup = helpers.parse_html_as_soup(product_url)
-        if not soup:
-            prices.append(['', ''])
-            return
+    soup = helpers.parse_html_as_soup(product_url)
+    if not soup:
+        prices.append(['', ''])
+        return
 
-        current_price = parser.find_current_price(soup)
-        best_price = parser.find_best_price(soup)
+    current_price = parser.find_current_price(soup)
+    best_price = parser.find_best_price(soup)
 
-        print(f'\t[INFO] Current price: {current_price}, Best price: {best_price}\n')
+    print(f'\t[INFO] Current price: {current_price}, Best price: {best_price}\n')
 
-        prices.append([current_price, best_price])
+    prices.append([current_price, best_price])
 
     return prices
 
@@ -46,16 +45,10 @@ def main():
     })
 
     product_urls = sheet_redactor.get_product_urls()
-    product_prices = get_product_prices(product_urls)
-    sheet_redactor.update_product_prices(product_prices)
 
-    sheet_redactor.format_products_with_inefficient_price({
-        'backgroundColor': {
-            'red': 1,
-            'green': 1,
-            'blue': 0,
-        }
-    })
+    for product_url in product_urls:
+        product_prices = get_product_prices(product_url)
+        sheet_redactor.update_product_prices(product_prices, update_formatting=True)
 
 
 if __name__ == '__main__':

@@ -20,7 +20,7 @@ class OzonParser:
             float(current_price)
         except ValueError:
             print('\t[ERROR] Cannot parse current price\n')
-            return ''
+            return None
 
         print('\t[SUCCESS] Done!\n')
         return f'{current_price}'
@@ -40,4 +40,4 @@ class OzonParser:
                 return best_price[:-1]
 
         print('\t[WARNING] Cannot parse best price\n')
-        return ''
+        return None
