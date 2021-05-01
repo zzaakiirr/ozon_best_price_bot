@@ -33,7 +33,7 @@ def get_product_prices(product_url):
     return prices
 
 
-def main():
+def submit():
     sheet_redactor = google_sheets.OzonSheetRedactor()
 
     sheet_redactor.set_initial_formatting({
@@ -50,9 +50,11 @@ def main():
         product_prices = get_product_prices(product_url)
         sheet_redactor.update_product_prices(product_prices, update_formatting=True)
 
+    print('\n[INFO] Completed!')
+
 
 if __name__ == '__main__':
-    main()
+    submit()
 
     # Add pause after program execution
     input()
