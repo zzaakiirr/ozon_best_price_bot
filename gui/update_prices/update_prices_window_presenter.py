@@ -26,25 +26,44 @@ class UpdatePricesWindowPresenter:
                  update_button_text='Update',
                  exit_button_text='Exit'):
 
+        self.root_window = root_window
+
         self.window_title = window_title
         self.new_prices_info = new_prices_info
-        self.action_handler = action_handler.UpdatePricesWindowActionHandler(new_prices_api_body)
+        self.new_prices_api_body = new_prices_api_body
 
-        self.window = tk.Toplevel(root_window)
+        self.window_title = window_title
+        self.update_button_text = update_button_text
+        self.exit_button_text = exit_button_text
+
+    # MARK: - Public methods
+
+    def start(self):
+        self.__init_ui_elements()
+        self.__configure_window(self.window_title)
+        self.__configure_scroll_bar()
+        self.__show_ui()
+
+    # MARK: - Private methods
+
+    def __init_ui_elements(self):
+        action_handler = UpdatePricesWindowActionHandler(self.new_prices_api_body)
+
+        self.window = tk.Toplevel(self.root_window)
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
 
         update_button_command = lambda: self.__start_submit_thread(
-            self.action_handler.update_button_tapped
+            action_handler.update_button_tapped
         )
         self.update_button = tk.Button(self.sidebar_frame,
-                                      text=update_button_text,
+                                      text=self.update_button_text,
                                       command=update_button_command,
                                       width=BUTTON_SIZE['width'],
                                       height=BUTTON_SIZE['height'],
                                       bg=BUTTON_BG_COLOR)
 
         self.exit_button = tk.Button(self.sidebar_frame,
-                                     text=exit_button_text,
+                                     text=self.exit_button_text,
                                      command=self.window.destroy,
                                      width=BUTTON_SIZE['width'],
                                      height=BUTTON_SIZE['height'],
@@ -56,15 +75,6 @@ class UpdatePricesWindowPresenter:
                                    width=LIST_BOX['width'],
                                    height=LIST_BOX['height'],
                                    font=LIST_BOX['font'])
-
-    # MARK: - Public methods
-
-    def start(self):
-        self.__configure_window(self.window_title)
-        self.__configure_scroll_bar()
-        self.__show_ui()
-
-    # MARK: - Private methods
 
     def __configure_window(self, title):
         self.window.title(title)
