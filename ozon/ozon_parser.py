@@ -1,6 +1,7 @@
 ﻿BEST_PRICE_STR = 'Есть дешевле, '
 CURRENT_PRICE_STR = '\"finalPrice\"'
 
+
 class OzonParser:
 
     # MARK: - Public static methods
