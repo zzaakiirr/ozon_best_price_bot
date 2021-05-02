@@ -1,0 +1,6 @@
+README.md
+setup.py
+ozon_best_price_bot.egg-info/PKG-INFO
+ozon_best_price_bot.egg-info/SOURCES.txt
+ozon_best_price_bot.egg-info/dependency_links.txt
+ozon_best_price_bot.egg-info/top_level.txt
