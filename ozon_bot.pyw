@@ -164,7 +164,7 @@ class OzonSheetRedactor:
 
     def __get_sheet(self, service_account_filename, workbook_name):
         try:
-            gc = gspread.service_account(filename=path)
+            gc = gspread.service_account(filename=service_account_filename)
             sh = gc.open(workbook_name)
         except FileNotFoundError:
             print(f"[ERROR] No such file '{service_account_filename}'")
@@ -328,12 +328,12 @@ class MainWindowPresenter:
     def __init__(self,
                  window_title='OzonBot',
                  start_button_text='Start',
-                 update_button_text='Get new prices',
+                 get_new_prices_button_text='Get new prices',
                  exit_button_text='Exit'): 
 
         self.window_title = window_title
         self.start_button_text = start_button_text
-        self.update_button_text = update_button_text
+        self.get_new_prices_button_text = get_new_prices_button_text
         self.exit_button_text = exit_button_text
 
 
@@ -374,8 +374,8 @@ class MainWindowPresenter:
         get_new_prices_button_command = lambda: self.__start_submit_thread(
             action_handler.get_new_prices_button_tapped
         )
-        self.update_button = tk.Button(self.sidebar_frame,
-                                       text=self.update_button_text,
+        self.get_new_prices_button = tk.Button(self.sidebar_frame,
+                                       text=self.get_new_prices_button_text,
                                        command=get_new_prices_button_command,
                                        width=BUTTON_SIZE['width'],
                                        height=BUTTON_SIZE['height'],
@@ -397,7 +397,7 @@ class MainWindowPresenter:
         self.sidebar_frame.pack(side=sidebar_side)
         self.text_box.pack(side=text_side)
         self.start_button.pack(pady=VERTICAL_SPACE_BETWEEN_BUTTONS)
-        self.update_button.pack()
+        self.get_new_prices_button.pack()
         self.exit_button.pack(pady=VERTICAL_SPACE_BETWEEN_BUTTONS)
 
     # MARK: - Threading
@@ -407,14 +407,14 @@ class MainWindowPresenter:
         self.submit_thread.daemon = True
         self.submit_thread.start()
         self.window.after(20, self.__check_submit_thread)
-        self.update_button.configure(state='disable')
+        self.get_new_prices_button.configure(state='disable')
         self.start_button.configure(state='disable')
 
     def __check_submit_thread(self):
         if self.submit_thread.is_alive():
             self.window.after(20, self.__check_submit_thread)
         else:
-            self.update_button.configure(state='normal')
+            self.get_new_prices_button.configure(state='normal')
             self.start_button.configure(state='normal')
 
 
