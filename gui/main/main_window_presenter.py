@@ -27,9 +27,25 @@ class MainWindowPresenter:
                  exit_button_text='Exit'): 
 
         self.window_title = window_title
+        self.start_button_text = start_button_text
+        self.update_button_text = update_button_text
+        self.exit_button_text = exit_button_text
 
+
+    # MARK: - Public methods
+
+    def start(self):
+        self.__init_ui_elements()
+        self.__configure_window(self.window_title)
+        self.__pack_widgets()
+        self.window.mainloop()
+
+    # MARK: - Private methods
+
+    def __init_ui_elements(self):
         self.window = tk.Tk()
-        self.action_handler = action_handler.MainWindowActionHandler(self.window)
+
+        action_handler = MainWindowActionHandler(self.window)
       
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
 
@@ -41,40 +57,31 @@ class MainWindowPresenter:
         sys.stdout = StdoutRedirector(self.text_box)
 
         start_button_command = lambda: self.__start_submit_thread(
-            self.action_handler.start_button_tapped
+            action_handler.start_button_tapped
         )
         self.start_button = tk.Button(self.sidebar_frame,
-                                      text=start_button_text,
+                                      text=self.start_button_text,
                                       command=start_button_command,
                                       width=BUTTON_SIZE['width'],
                                       height=BUTTON_SIZE['height'],
                                       bg=BUTTON_BG_COLOR)
 
         get_new_prices_button_command = lambda: self.__start_submit_thread(
-            self.action_handler.get_new_prices_button_tapped
+            action_handler.get_new_prices_button_tapped
         )
         self.update_button = tk.Button(self.sidebar_frame,
-                                       text=update_button_text,
+                                       text=self.update_button_text,
                                        command=get_new_prices_button_command,
                                        width=BUTTON_SIZE['width'],
                                        height=BUTTON_SIZE['height'],
                                        bg=BUTTON_BG_COLOR)
 
         self.exit_button = tk.Button(self.sidebar_frame,
-                                     text=exit_button_text,
+                                     text=self.exit_button_text,
                                      command=self.window.destroy,
                                      width=BUTTON_SIZE['width'],
                                      height=BUTTON_SIZE['height'],
                                      bg=BUTTON_BG_COLOR)
-
-    # MARK: - Public methods
-
-    def start(self):
-        self.__configure_window(self.window_title)
-        self.__pack_widgets()
-        self.window.mainloop()
-
-    # MARK: - Private methods
 
     def __configure_window(self, title):
         self.window.title(title)
