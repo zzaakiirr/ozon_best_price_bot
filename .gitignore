@@ -8,3 +8,6 @@ service_account.json
 
 # Environment
 venv/
+
+# Spec files
+*.spec
