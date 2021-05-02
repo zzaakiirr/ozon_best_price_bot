@@ -36,7 +36,7 @@ class MainWindowActionHandler:
 
         print('\n[INFO] Completed!\n')
 
-    def update_button_tapped(self):
+    def get_new_prices_button_tapped(self):
         print('[INFO] Loading new prices. Please wait...')
 
         new_prices_info, new_prices_api_body = self.__get_new_product_prices()

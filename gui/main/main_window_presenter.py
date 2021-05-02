@@ -23,7 +23,7 @@ class MainWindowPresenter:
     def __init__(self,
                  window_title='OzonBot',
                  start_button_text='Start',
-                 update_button_text='Update',
+                 update_button_text='Get new prices',
                  exit_button_text='Exit'): 
 
         self.window_title = window_title
@@ -50,12 +50,12 @@ class MainWindowPresenter:
                                       height=BUTTON_SIZE['height'],
                                       bg=BUTTON_BG_COLOR)
 
-        update_button_command = lambda: self.__start_submit_thread(
-            self.action_handler.update_button_tapped
+        get_new_prices_button_command = lambda: self.__start_submit_thread(
+            self.action_handler.get_new_prices_button_tapped
         )
         self.update_button = tk.Button(self.sidebar_frame,
                                        text=update_button_text,
-                                       command=update_button_command,
+                                       command=get_new_prices_button_command,
                                        width=BUTTON_SIZE['width'],
                                        height=BUTTON_SIZE['height'],
                                        bg=BUTTON_BG_COLOR)
