@@ -4,12 +4,13 @@ import requests
 
 # MARK: - Constants
 
-# CLIENT_ID = '73927'
-# API_KEY = '8b160fb8-8fa8-458c-856f-557e319b59ec'
+CLIENT_ID = '73927'
+API_KEY = '8b160fb8-8fa8-458c-856f-557e319b59ec'
+BASE_URI = 'api-seller.ozon.ru'
 
-CLIENT_ID_TEST = '836'
-API_KEY_TEST = '0296d4f2-70a1-4c09-b507-904fd05567b9'
-BASE_URI_TEST = 'https://cb-api.ozonru.me'
+# CLIENT_ID_TEST = '836'
+# API_KEY_TEST = '0296d4f2-70a1-4c09-b507-904fd05567b9'
+# BASE_URI_TEST = 'https://cb-api.ozonru.me'
 
 
 # MARK: - Main classes
@@ -18,7 +19,7 @@ class OzonAPI:
 
     # MARK: - Init
 
-    def __init__(self, base_uri=BASE_URI_TEST, client_id=CLIENT_ID_TEST, api_key=API_KEY_TEST):
+    def __init__(self, base_uri=BASE_URI, client_id=CLIENT_ID, api_key=API_KEY):
         self.base_uri = base_uri
         self.client_id = client_id
         self.api_key = api_key
@@ -32,6 +33,7 @@ class OzonAPI:
     # Swagger: https://api-seller.ozon.ru/docs/#/ProductAPI/ProductAPI_ImportProductsPrices
     def update_prices(self, prices):
         print('[INFO] Updating prices...')
+
         url = f'{self.base_uri}/v1/product/import/prices'
         payload = { 'prices': prices }
     
