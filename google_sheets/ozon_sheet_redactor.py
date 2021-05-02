@@ -124,20 +124,11 @@ class OzonSheetRedactor:
 
         print('[SUCCESS] Done!\n')
 
-    # MARK: - Private static methods
-
-    @staticmethod
-    def __service_account_path(service_account_filename):
-        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        path = os.path.join(__location__, service_account_filename)
-        return path
-
     # MARK: - Private methods
 
     def __get_sheet(self, service_account_filename, workbook_name):
         try:
-            path = OzonSheetRedactor.__service_account_path(service_account_filename)
-            gc = gspread.service_account(filename=path)
+            gc = gspread.service_account(filename=service_account_filename)
             sh = gc.open(workbook_name)
         except FileNotFoundError:
             print(f"[ERROR] No such file '{service_account_filename}'")
