@@ -1,6 +1,9 @@
-﻿BEST_PRICE_STR = 'Есть дешевле, '
+﻿# MARK: - Constants
+
+BEST_PRICE_STR = 'Есть дешевле, '
 CURRENT_PRICE_STR = '\"finalPrice\"'
 
+# MARK: - Main classes
 
 class OzonParser:
 

@@ -30,6 +30,7 @@ class OzonAPI:
     # Swagger: https://api-seller.ozon.ru/docs/#/ProductAPI/ProductAPI_ImportProductsPrices
     def update_prices(self, prices):
         print('[INFO] Updating prices...')
+
         url = f'{self.base_uri}/v1/product/import/prices'
         payload = { 'prices': prices }
     
