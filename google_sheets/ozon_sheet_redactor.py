@@ -1,4 +1,5 @@
 import os
+import time
 import gspread
 
 from google_sheets.ozon_sheet_config import (
@@ -95,6 +96,17 @@ class OzonSheetRedactor:
                 current_row_cell_range = f'{FIRST_CELL_LETTER}{row_index}:'\
                                          f'{LAST_CELL_LETTER}{row_index}'
                 self.update_formatting(current_row_cell_range, prices)
+        except gspread.exceptions.APIError as e:
+            response = e.response.json()
+            error = response.get('error')
+            code = error.get('code')
+            if code == 429:
+                print(f'[INFO] "Write requests" limit exceeded, will sleep 5 seconds...')
+                time.sleep(5)
+                print(f'[INFO] Trying again...')
+                self.update_product_prices(prices, row_index, update_formatting)
+            else:
+                print(f'[ERROR] Unexpected error: {e}')
         except Exception as e:
             print(f'[ERROR] Unexpected error: {e}')
 
