@@ -5,9 +5,9 @@ import requests
 
 # MARK: - Constants
 
-CLIENT_ID_TEST = os.environ.get('CLIENT_ID')
-API_KEY_TEST = os.environ.get('API_KEY')
-BASE_URI_TEST = 'https://cb-api.ozonru.me'
+CLIENT_ID = os.environ.get('CLIENT_ID')
+API_KEY = os.environ.get('API_KEY')
+BASE_URI = 'api-seller.ozon.ru'
 
 
 # MARK: - Main classes
@@ -16,7 +16,7 @@ class OzonAPI:
 
     # MARK: - Init
 
-    def __init__(self, base_uri=BASE_URI_TEST, client_id=CLIENT_ID_TEST, api_key=API_KEY_TEST):
+    def __init__(self, base_uri=BASE_URI, client_id=CLIENT_ID, api_key=API_KEY):
         self.base_uri = base_uri
         self.client_id = client_id
         self.api_key = api_key
