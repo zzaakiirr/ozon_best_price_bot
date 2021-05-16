@@ -137,8 +137,8 @@ class OzonSheetRedactor:
             error = response.get('error')
             code = error.get('code')
             if code == 429:
-                print(f'[INFO] "Write requests" limit exceeded, will sleep 5 seconds...')
-                time.sleep(5)
+                print(f'[INFO] "Write requests" limit exceeded, will wait 3 seconds...')
+                time.sleep(3)
                 print(f'[INFO] Trying again...')
                 self.update_product_prices(prices, row_index, update_formatting)
             else:
@@ -257,6 +257,11 @@ class MainWindowActionHandler:
             prices.append(['', ''])
             return
 
+        while 'name="robots"' in str(soup):
+            print('[WARNING] Bot was spotted. Waiting 3 seconds...')
+            time.sleep(3)
+            soup = parse_html_as_soup(product_url)
+
         current_price = parser.find_current_price(soup)
         best_price = parser.find_best_price(soup)
 
@@ -299,25 +304,38 @@ class MainWindowActionHandler:
 
 ### ---- gui/main/main_window_action_handler_helpers ----
 
+import random
+
 import requests
 from bs4 import BeautifulSoup
 
 
 # Need to set 'User-Agent' header for pretending not to be a robot while accessing URL
 # More info: https://stackoverflow.com/a/36971955
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)' \
-                  'AppleWebKit/537.36 (KHTML, like Gecko)' \
-                  'Chrome/39.0.2171.95 Safari/537.36'
-}
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0)' \
+        'Gecko/20100101 Firefox/47.0',
+
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)' \
+        'AppleWebKit/537.36 (KHTML, like Gecko)' \
+        'Chrome/39.0.2171.95 Safari/537.36',
+
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X)' \
+        'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1' \
+        'Mobile/15E148 Safari/604.1',
+]
 
 
-def parse_html_as_soup(product_url, headers=HEADERS):
+def parse_html_as_soup(product_url):
     try:
-      response = requests.get(product_url, headers=headers)
-      status_code = response.status_code
-      if status_code != 200:
-        raise
+        headers = {
+            'User-Agent': random.choice(USER_AGENTS)
+        }
+        response = requests.get(product_url, headers=headers)
+        status_code = response.status_code
+        if status_code != 200:
+            print(f'[ERROR] Cannot parse product url: {product_url}')
+            return None
     except:
         print(f'[ERROR] Cannot parse product url: {product_url}')
         return None
@@ -650,7 +668,12 @@ class OzonParser:
 
         html_text = str(soup)
 
-        current_price_index = html_text.index(CURRENT_PRICE_STR)
+        try:
+            current_price_index = html_text.index(CURRENT_PRICE_STR)
+        except ValueError:
+            print('\t[ERROR] Cannot find current price index\n')
+            return None
+
         start_index = current_price_index + len(CURRENT_PRICE_STR) + 1
         end_index = html_text.index(',', current_price_index)
         current_price = html_text[start_index:end_index]
