@@ -39,12 +39,10 @@ class MainWindowActionHandler:
         print('\n[INFO] Completed!\n')
 
     def get_new_prices_button_tapped(self):
-        print('[INFO] Loading new prices. Please wait...')
+        print('[INFO] Fetching new prices. Please wait...')
 
-        new_prices_info, new_prices_api_body = self.__get_new_product_prices()
-        update_prices_window_presenter = UpdatePricesWindowPresenter(self.window,
-                                                                     new_prices_info,
-                                                                     new_prices_api_body)
+        new_prices_info = self.sheet_redactor.get_products_for_price_updating()
+        update_prices_window_presenter = UpdatePricesWindowPresenter(self.window, new_prices_info)
         update_prices_window_presenter.start()
 
     # MARK: - Private methods
@@ -84,28 +82,3 @@ class MainWindowActionHandler:
         prices.append([current_price, best_price, new_price])
 
         return prices
-
-    def __get_new_product_prices(self):
-        new_prices_api_body = []
-        new_prices_info = []
-
-        for row_index in range(self.sheet_redactor.start_index, self.sheet_redactor.end_index):
-            product_title, product_id, new_price = self.sheet_redactor.get_new_prices(row_index)
-
-            if not product_id or not new_price:
-                break
-
-            # TODO: Create class Product instead of this workaround
-            new_price_api_body = {
-                'product_id': int(product_id),
-                'price': new_price
-            }
-            new_prices_api_body.append(new_price_api_body)
-
-            new_price_info = {
-                'product_title': product_title,
-                'price': int(new_price)
-            }
-            new_prices_info.append(new_price_info)
-
-        return new_prices_info, new_prices_api_body

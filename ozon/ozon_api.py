@@ -7,7 +7,7 @@ import requests
 
 CLIENT_ID = os.environ.get('CLIENT_ID')
 API_KEY = os.environ.get('API_KEY')
-BASE_URI = 'api-seller.ozon.ru'
+BASE_URI = 'https://api-seller.ozon.ru'
 
 
 # MARK: - Main classes
