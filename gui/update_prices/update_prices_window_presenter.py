@@ -1,8 +1,7 @@
 import threading
 import tkinter as tk
 
-import gui.update_prices.update_prices_action_handler as action_handler
-import gui.gui_helpers as gui_helpers
+import gui.update_prices.update_prices_action_handler as update_prices_action_handler
 
 from gui.gui_config import (
   SIDEBAR_BG_COLOR,
@@ -47,7 +46,7 @@ class UpdatePricesWindowPresenter:
     # MARK: - Private methods
 
     def __init_ui_elements(self):
-        action_handler = UpdatePricesWindowActionHandler(self.new_prices_api_body)
+        action_handler = update_prices_action_handler.UpdatePricesWindowActionHandler(self.new_prices_api_body)
 
         self.window = tk.Toplevel(self.root_window)
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)

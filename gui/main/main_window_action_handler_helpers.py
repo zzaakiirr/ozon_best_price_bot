@@ -1,5 +1,4 @@
 import random
-from itertools import cycle
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,9 +22,10 @@ HEADERS = {
     'Accept-Language': 'en-us',
     'DNT': '1',
 }
+TIMEOUT = 2
 
 
-def parse_html_as_soup(product_url, headers=HEADERS):
+def parse_html_as_soup(product_url, headers=HEADERS, timeout=TIMEOUT):
     try:
         headers['User-Agent'] = random.choice(USER_AGENTS)
         headers['Referer'] = f'https://www.google.com/url?q={product_url}' \
@@ -33,7 +33,7 @@ def parse_html_as_soup(product_url, headers=HEADERS):
                               '&ust=1623878008220000' \
                               '&usg=AOvVaw1yjR2IzLGGF7f92nlr8Wj3'
 
-        response = requests.get(product_url, headers=headers)
+        response = requests.get(product_url, headers=headers, timeout=timeout)
         status_code = response.status_code
         if status_code != 200:
             raise

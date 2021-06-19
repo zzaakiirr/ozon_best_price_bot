@@ -2,7 +2,7 @@ import sys
 import threading
 import tkinter as tk
 
-import gui.main.main_window_action_handler as action_handler
+import gui.main.main_window_action_handler as main_window_action_handler
 
 from gui.gui_config import (
   SIDEBAR_BG_COLOR,
@@ -31,7 +31,6 @@ class MainWindowPresenter:
         self.get_new_prices_button_text = get_new_prices_button_text
         self.exit_button_text = exit_button_text
 
-
     # MARK: - Public methods
 
     def start(self):
@@ -44,17 +43,14 @@ class MainWindowPresenter:
 
     def __init_ui_elements(self):
         self.window = tk.Tk()
-
-        action_handler = MainWindowActionHandler(self.window)
-      
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
-
         self.text_box = tk.Text(master=self.window,
                                 state='disabled',
                                 bg=TEXT_BOX_BG_COLOR,
                                 fg=TEXT_BOX_FG_COLOR)
 
         sys.stdout = StdoutRedirector(self.text_box)
+        action_handler = main_window_action_handler.MainWindowActionHandler(self.window)
 
         start_button_command = lambda: self.__start_submit_thread(
             action_handler.start_button_tapped
@@ -127,10 +123,3 @@ class StdoutRedirector:
 
     def flush(self):
         pass
-
-
-# MARK: - Main flow
-
-if __name__ == '__main__':
-    main_window_presenter = MainWindowPresenter()
-    main_window_presenter.start()
