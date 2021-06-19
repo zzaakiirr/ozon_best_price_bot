@@ -1,4 +1,6 @@
-import ozon.ozon_parser as ozon_parser
+import time
+
+from ozon.ozon_parser import OzonParser
 import google_sheets.ozon_sheet_redactor as ozon_sheet_redactor
 
 import gui.main.main_window_action_handler_helpers as helpers
@@ -11,9 +13,9 @@ class MainWindowActionHandler:
 
     # MARK: - Init
 
-    def __init__(self, window, sheet_redactor = ozon_sheet_redactor.OzonSheetRedactor()):
+    def __init__(self, window):
         self.window = window
-        self.sheet_redactor = sheet_redactor
+        self.sheet_redactor = ozon_sheet_redactor.OzonSheetRedactor()
 
     # MARK: - Public methods
 
@@ -57,18 +59,20 @@ class MainWindowActionHandler:
                    2nd product has current price = 3 and best price = 4
     """
     def __get_product_prices(self, product_url):
-        parser = ozon_parser.OzonParser()
         prices = []
 
         print(product_url)
 
         soup = helpers.parse_html_as_soup(product_url)
-        if not soup:
-            prices.append(['', ''])
-            return
+        i = 0
+        while 'name="robots"' in str(soup) or (soup is None and i <= 10):
+            print('[WARNING] Bot was spotted. Trying again...')
+            time.sleep(0.5)
+            soup = helpers.parse_html_as_soup(product_url)
+            i += 1
 
-        current_price = parser.find_current_price(soup)
-        best_price = parser.find_best_price(soup)
+        current_price = OzonParser.find_current_price(soup)
+        best_price = OzonParser.find_best_price(soup)
 
         if current_price and best_price and current_price > best_price:
             new_price = int(best_price) - 1
