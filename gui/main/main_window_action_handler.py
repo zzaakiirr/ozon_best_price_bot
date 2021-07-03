@@ -69,8 +69,11 @@ class MainWindowActionHandler:
             soup = helpers.parse_html_as_soup(product_url)
             i += 1
 
-        current_price = OzonParser.find_current_price(soup)
-        best_price = OzonParser.find_best_price(soup)
+        if soup is None:
+            current_price, best_price = None, None
+        else:
+            current_price = OzonParser.find_current_price(soup)
+            best_price = OzonParser.find_best_price(soup)
 
         if current_price and best_price and current_price > best_price:
             new_price = int(best_price) - 1
