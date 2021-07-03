@@ -12,12 +12,11 @@ class OzonParser:
 
         html_text = str(soup)
 
-        current_price_index = html_text.index(CURRENT_PRICE_STR)
-        start_index = current_price_index + len(CURRENT_PRICE_STR) + 1
-        end_index = html_text.index(',', current_price_index)
-        current_price = html_text[start_index:end_index]
-
         try:
+            current_price_index = html_text.index(CURRENT_PRICE_STR)
+            start_index = current_price_index + len(CURRENT_PRICE_STR) + 1
+            end_index = html_text.index(',', current_price_index)
+            current_price = html_text[start_index:end_index]
             float(current_price)
         except ValueError:
             print('\t[ERROR] Cannot parse current price\n')
