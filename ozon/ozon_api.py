@@ -6,7 +6,7 @@ import requests
 
 CLIENT_ID = '73927'
 API_KEY = '8b160fb8-8fa8-458c-856f-557e319b59ec'
-BASE_URI = 'api-seller.ozon.ru'
+BASE_URI = 'https://api-seller.ozon.ru'
 
 # CLIENT_ID_TEST = '836'
 # API_KEY_TEST = '0296d4f2-70a1-4c09-b507-904fd05567b9'
