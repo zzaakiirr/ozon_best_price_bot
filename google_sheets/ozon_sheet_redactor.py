@@ -1,5 +1,8 @@
 import os
-import gspread
+import time
+
+from gspread import service_account
+from gspread.exceptions import APIError
 
 from google_sheets.ozon_sheet_config import (
     SERVICE_ACCOUNT_FILENAME,
@@ -69,14 +72,14 @@ class OzonSheetRedactor:
     def get_product_urls(self):
         print('[INFO] Parsing URLs from sheet...')
         # First value is title of column
-        urls = self.sheet.col_values(self.urls_col_number)[1:]
+        urls = self.__safe_sheet_method('col_values', self.urls_col_number)[1:]
         print('[SUCCESS] Done!\n')
         return urls
 
     def get_products_for_price_updating(self):
         products = []
         # First row is header
-        product_rows = self.sheet.get_all_values()[1:]
+        product_rows = self.__safe_sheet_method('get_all_values')[1:]
 
         for product_row in product_rows:
             product_title = product_row[self.product_title_col_number - 1]
@@ -101,7 +104,7 @@ class OzonSheetRedactor:
         try:
             price_cell_range = f'{self.current_price_col}{row_index}:' \
                                f'{self.new_price_col}{row_index + 1}'
-            self.sheet.update(price_cell_range, prices)
+            self.__safe_sheet_method('update', price_cell_range, prices)
 
             if update_formatting:
                 current_row_cell_range = f'{FIRST_CELL_LETTER}{row_index}:'\
@@ -114,14 +117,16 @@ class OzonSheetRedactor:
         cell_range = f'{FIRST_CELL_LETTER}{self.start_index}:{LAST_CELL_LETTER}{self.end_index}'
         print(f'[INFO] Setting initial formatting {cell_range}...')
 
-        self.sheet.format(cell_range, formatting)
+        self.__safe_sheet_method('format', cell_range, formatting)
         print('[SUCCESS] Done!\n')
 
     def update_formatting(self, cell_range, prices):
         print(f'[INFO] Formatting cells {cell_range}...')
 
         if not prices:
-            self.sheet.format(cell_range, self.error_price_formatting)
+            self.__safe_sheet_method('format',
+                                     cell_range,
+                                     self.error_price_formatting)
             return
 
         prices = prices[0]
@@ -132,15 +137,16 @@ class OzonSheetRedactor:
             return
 
         if current_price > best_price:
-            self.sheet.format(cell_range, self.inefficient_price_formatting)
-
+            self.__safe_sheet_method('format',
+                                     cell_range,
+                                     self.inefficient_price_formatting)
         print('[SUCCESS] Done!\n')
 
     # MARK: - Private methods
 
     def __get_sheet(self, service_account_filename, workbook_name):
         try:
-            gc = gspread.service_account(filename=service_account_filename)
+            gc = service_account(filename=service_account_filename)
             sh = gc.open(workbook_name)
         except FileNotFoundError:
             print(f"[ERROR] No such file '{service_account_filename}'")
@@ -153,4 +159,18 @@ class OzonSheetRedactor:
             result = float(price.split('\xa0')[0])
         except ValueError:
             return None
+        return result
+
+    # MARK: - Safe table access
+
+    def __safe_sheet_method(self, method_name, *args, **kwargs):
+        result = None
+        i = 0
+        while not result and i < 10:
+            try:
+                result = getattr(self.sheet, method_name)(*args, **kwargs)
+            except APIError:
+                print('[ERROR] Working too fast! Waiting 5 seconds...')
+                time.sleep(5)
+                i += 1
         return result
