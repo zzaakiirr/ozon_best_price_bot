@@ -1,8 +1,9 @@
 import threading
 import tkinter as tk
 
-import gui.update_prices.update_prices_action_handler as action_handler
-import gui.gui_helpers as gui_helpers
+from gui.update_prices.update_prices_action_handler import (
+    UpdatePricesWindowActionHandler
+)
 
 from gui.gui_config import (
   SIDEBAR_BG_COLOR,
@@ -21,7 +22,6 @@ class UpdatePricesWindowPresenter:
     def __init__(self,
                  root_window,
                  new_prices_info,
-                 new_prices_api_body,
                  window_title='Update prices',
                  update_button_text='Update',
                  exit_button_text='Exit'):
@@ -30,7 +30,7 @@ class UpdatePricesWindowPresenter:
 
         self.window_title = window_title
         self.new_prices_info = new_prices_info
-        self.new_prices_api_body = new_prices_api_body
+        self.new_prices_api_body = self.__get_new_prices_api_body()
 
         self.window_title = window_title
         self.update_button_text = update_button_text
@@ -47,11 +47,12 @@ class UpdatePricesWindowPresenter:
     # MARK: - Private methods
 
     def __init_ui_elements(self):
-        action_handler = UpdatePricesWindowActionHandler(self.new_prices_api_body)
-
         self.window = tk.Toplevel(self.root_window)
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
 
+        action_handler = UpdatePricesWindowActionHandler(
+            self.new_prices_api_body
+        )
         update_button_command = lambda: self.__start_submit_thread(
             action_handler.update_button_tapped
         )
@@ -99,6 +100,25 @@ class UpdatePricesWindowPresenter:
             product_title = new_price_info['product_title']
             product_price = new_price_info['price']
             self.list_box.insert(tk.END, f'{product_title} --- {product_price}')
+
+    def __get_new_prices_api_body(self):
+        new_prices_api_body = []
+
+        for new_price_info in self.new_prices_info:
+            try:
+                # Price should be float or int
+                float(new_price_info['price'])
+                new_price_api_body = {
+                    'product_id': int(new_price_info['product_id']),
+                    'price': new_price_info['price']
+                }
+            except:
+                self.new_prices_info.remove(new_price_info)
+                continue
+
+            new_prices_api_body.append(new_price_api_body)
+
+        return new_prices_api_body
 
     # MARK: - Threading
 
