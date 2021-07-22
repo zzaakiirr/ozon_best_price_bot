@@ -36,22 +36,28 @@ class OzonAPI:
 
         url = f'{self.base_uri}/v1/product/import/prices'
         payload = { 'prices': prices }
-    
+
         try:
-            response = requests.post(url, data=json.dumps(payload), headers=self.headers)
+            response = requests.post(url,
+                                     data=json.dumps(payload),
+                                     headers=self.headers)
         # TODO: Catch more specific exceptions
         except Exception as e:
             print(f'[ERROR] Cannot update prices. Unexpected exception: {e}')
             return
 
-        if response.status_code == 200:
-            response_data = response.json()
-            results = response_data['result']
+        if response.status_code != 200:
+            return
 
-            for result in results:
-                if result.get('updated'):
-                    product_id = result['product_id']
-                    print(f'\t[SUCCESS] Successfully updated price for product with id: {product_id}')
-                else:
-                    errors = result.get('errors', '?')
-                    print(f'\t[ERROR] Failed to update prices wia API request with errors: {errors}')
+        response_data = response.json()
+        results = response_data['result']
+
+        for result in results:
+            if result.get('updated'):
+                product_id = result['product_id']
+                print('\t[SUCCESS] Successfully updated price for ' \
+                      f'product with id: {product_id}')
+            else:
+                errors = result.get('errors', '?')
+                print('\t[ERROR] Failed to update prices via API request' \
+                      f' with errors: {errors}')
