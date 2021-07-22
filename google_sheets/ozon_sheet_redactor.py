@@ -114,7 +114,8 @@ class OzonSheetRedactor:
             print(f'[ERROR] Unexpected error: {e}')
 
     def set_initial_formatting(self, formatting):
-        cell_range = f'{FIRST_CELL_LETTER}{self.start_index}:{LAST_CELL_LETTER}{self.end_index}'
+        cell_range = f'{FIRST_CELL_LETTER}{self.start_index}:' \
+                     f'{LAST_CELL_LETTER}{self.end_index}'
         print(f'[INFO] Setting initial formatting {cell_range}...')
 
         self.__safe_sheet_method('format', cell_range, formatting)
@@ -150,7 +151,8 @@ class OzonSheetRedactor:
             sh = gc.open(workbook_name)
         except FileNotFoundError:
             print(f"[ERROR] No such file '{service_account_filename}'")
-            print(f"[INFO] Добавьте файл '{service_account_filename}' в папку, где лежит программа")
+            print(f"[INFO] Добавьте файл '{service_account_filename}' " \
+                   "в папку, где лежит программа")
         else:
             return sh.sheet1
 
@@ -169,8 +171,9 @@ class OzonSheetRedactor:
         while not result and i < 10:
             try:
                 result = getattr(self.sheet, method_name)(*args, **kwargs)
-            except APIError:
-                print('[ERROR] Working too fast! Waiting 5 seconds...')
+            except APIError as e:
+                print(f'[ERROR] Error with Google sheet API: {e}.' \
+                       'Waiting 5 seconds...')
                 time.sleep(5)
                 i += 1
         return result

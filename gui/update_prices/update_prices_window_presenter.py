@@ -1,7 +1,9 @@
 import threading
 import tkinter as tk
 
-import gui.update_prices.update_prices_action_handler as update_prices_action_handler
+from gui.update_prices.update_prices_action_handler import (
+    UpdatePricesWindowActionHandler
+)
 
 from gui.gui_config import (
   SIDEBAR_BG_COLOR,
@@ -48,7 +50,9 @@ class UpdatePricesWindowPresenter:
         self.window = tk.Toplevel(self.root_window)
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
 
-        action_handler = update_prices_action_handler.UpdatePricesWindowActionHandler(self.new_prices_api_body)
+        action_handler = UpdatePricesWindowActionHandler(
+            self.new_prices_api_body
+        )
         update_button_command = lambda: self.__start_submit_thread(
             action_handler.update_button_tapped
         )

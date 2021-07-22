@@ -1,4 +1,5 @@
 __pycache__/
+.pyc
 
 # Mac OS extensions
 .DS_Store
@@ -8,6 +9,11 @@ service_account.json
 
 # Environment
 venv/
+*.pyc
 
 # Spec files
 *.spec
+
+# Pyinstaller
+build/
+dist/

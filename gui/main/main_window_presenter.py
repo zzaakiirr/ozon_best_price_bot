@@ -2,7 +2,7 @@ import sys
 import threading
 import tkinter as tk
 
-import gui.main.main_window_action_handler as main_window_action_handler
+from gui.main.main_window_action_handler import MainWindowActionHandler
 
 from gui.gui_config import (
   SIDEBAR_BG_COLOR,
@@ -24,7 +24,7 @@ class MainWindowPresenter:
                  window_title='OzonBot',
                  start_button_text='Start',
                  get_new_prices_button_text='Get new prices',
-                 exit_button_text='Exit'): 
+                 exit_button_text='Exit'):
 
         self.window_title = window_title
         self.start_button_text = start_button_text
@@ -50,7 +50,7 @@ class MainWindowPresenter:
                                 fg=TEXT_BOX_FG_COLOR)
 
         sys.stdout = StdoutRedirector(self.text_box)
-        action_handler = main_window_action_handler.MainWindowActionHandler(self.window)
+        action_handler = MainWindowActionHandler(self.window)
 
         start_button_command = lambda: self.__start_submit_thread(
             action_handler.start_button_tapped

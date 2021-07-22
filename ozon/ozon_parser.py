@@ -35,7 +35,10 @@ class OzonParser:
         target_divs = soup.find_all('div', class_='kxa6')
 
         for target_div in target_divs:
-            div_text = target_div.contents[0] if len(target_div.contents) else ''
+            if len(target_div.contents):
+                div_text = target_div.contents[0]
+            else:
+                div_text = ''
             if target_str in div_text:
                 _, best_price = div_text.split(', ')
 

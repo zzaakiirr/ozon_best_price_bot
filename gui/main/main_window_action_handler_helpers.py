@@ -4,8 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-# Need to set 'User-Agent' header for pretending not to be a robot while accessing URL
-# More info: https://stackoverflow.com/a/36971955
+# Need to set 'User-Agent' header for pretending not to be a robot
+# while accessing URL. More info: https://stackoverflow.com/a/36971955
 USER_AGENTS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)' \
         'AppleWebKit/537.36 (KHTML, like Gecko)' \
@@ -36,9 +36,9 @@ def parse_html_as_soup(product_url, headers=HEADERS, timeout=TIMEOUT):
         response = requests.get(product_url, headers=headers, timeout=timeout)
         status_code = response.status_code
         if status_code != 200:
-            raise
-    except:
-        print(f'[ERROR] Cannot parse product url: {product_url}')
+            raise Exception("Request returned not 200")
+    except Exception as e:
+        print(f'[ERROR] Cannot parse product url: {product_url}. Error: {e}')
         return None
 
     return BeautifulSoup(response.text, 'lxml')

@@ -1,10 +1,12 @@
 import time
 
 from ozon.ozon_parser import OzonParser
-import google_sheets.ozon_sheet_redactor as ozon_sheet_redactor
+from google_sheets.ozon_sheet_redactor import OzonSheetRedactor
 
-import gui.main.main_window_action_handler_helpers as helpers
-from gui.update_prices.update_prices_window_presenter import UpdatePricesWindowPresenter
+from gui.main.main_window_action_handler_helpers import parse_html_as_soup
+from gui.update_prices.update_prices_window_presenter import (
+    UpdatePricesWindowPresenter
+)
 
 
 # MARK: - Main classes
@@ -15,7 +17,7 @@ class MainWindowActionHandler:
 
     def __init__(self, window):
         self.window = window
-        self.sheet_redactor = ozon_sheet_redactor.OzonSheetRedactor()
+        self.sheet_redactor = OzonSheetRedactor()
 
     # MARK: - Public methods
 
@@ -33,7 +35,11 @@ class MainWindowActionHandler:
 
         for product_url in product_urls:
             product_prices = self.__get_product_prices(product_url)
-            self.sheet_redactor.update_product_prices(product_prices, current_row_index, update_formatting=True)
+            self.sheet_redactor.update_product_prices(
+                product_prices,
+                current_row_index,
+                update_formatting=True
+            )
             current_row_index += 1
 
         print('\n[INFO] Completed!\n')
@@ -42,7 +48,10 @@ class MainWindowActionHandler:
         print('[INFO] Fetching new prices. Please wait...')
 
         new_prices_info = self.sheet_redactor.get_products_for_price_updating()
-        update_prices_window_presenter = UpdatePricesWindowPresenter(self.window, new_prices_info)
+        update_prices_window_presenter = UpdatePricesWindowPresenter(
+            self.window,
+            new_prices_info
+        )
         update_prices_window_presenter.start()
 
     # MARK: - Private methods
@@ -61,12 +70,12 @@ class MainWindowActionHandler:
 
         print(product_url)
 
-        soup = helpers.parse_html_as_soup(product_url)
+        soup = parse_html_as_soup(product_url)
         i = 0
         while 'name="robots"' in str(soup) or (soup is None and i <= 10):
             print('[WARNING] Bot was spotted. Trying again...')
             time.sleep(0.5)
-            soup = helpers.parse_html_as_soup(product_url)
+            soup = parse_html_as_soup(product_url)
             i += 1
 
         if soup is None:
@@ -80,7 +89,8 @@ class MainWindowActionHandler:
         else:
             new_price = None
 
-        print(f'\t[INFO] Current price: {current_price}, Best price: {best_price}\n')
+        print(f'\t[INFO] Current price: {current_price}, ' \
+              f'Best price: {best_price}\n')
 
         prices.append([current_price, best_price, new_price])
 
