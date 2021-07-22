@@ -71,17 +71,10 @@ class MainWindowActionHandler:
         print(product_url)
 
         soup = parse_html_as_soup(product_url)
-        i = 0
-        while 'name="robots"' in str(soup) or (soup is None and i <= 10):
-            print('[WARNING] Bot was spotted. Trying again...')
-            time.sleep(0.5)
-            soup = parse_html_as_soup(product_url)
-            i += 1
-
         if soup is None:
             current_price, best_price = None, None
         else:
-            current_price = OzonParser.find_current_price(soup)
+            current_price = self.__find_current_price(product_url)
             best_price = OzonParser.find_best_price(soup)
 
         if current_price and best_price and current_price > best_price:
@@ -95,3 +88,27 @@ class MainWindowActionHandler:
         prices.append([current_price, best_price, new_price])
 
         return prices
+
+    # TODO: Implement helper method which runs something N times
+    def __find_current_price(self, product_url, max_attempt_count=10):
+        current_price = None
+        attempt = 0
+        while current_price is None and attempt < max_attempt_count:
+            soup = self.__parse_html_as_soup(product_url)
+            if soup is None:
+                continue
+
+            current_price = OzonParser.find_current_price(soup)
+            attempt += 1
+        return current_price
+
+    def __parse_html_as_soup(self, product_url, max_attempt_count=10):
+        soup = parse_html_as_soup(product_url)
+        attempt = 0
+        while 'name="robots"' in str(soup) or (soup is None and
+                                               attempt < max_attempt_count):
+            print('[WARNING] Bot was spotted. Trying again...')
+            time.sleep(0.5)
+            soup = parse_html_as_soup(product_url)
+            attempt += 1
+        return soup
