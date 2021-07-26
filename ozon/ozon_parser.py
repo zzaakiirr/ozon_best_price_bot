@@ -11,10 +11,10 @@ class OzonParser:
         print('\t[INFO] Searching for current price...')
 
         try:
-            current_price = cls._find_current_price(soup)
+            current_price = cls._find_current_price(soup).split('\xa0')[0]
             float(current_price)
-        except ValueError:
-            print('\t[ERROR] Cannot parse current price\n')
+        except ValueError as e:
+            print(f'\t[ERROR] Cannot parse current price: {e}\n')
             return None
 
         print('\t[SUCCESS] Done!\n')

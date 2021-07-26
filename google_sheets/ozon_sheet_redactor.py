@@ -156,13 +156,6 @@ class OzonSheetRedactor:
         else:
             return sh.sheet1
 
-    def __price_to_int(self, price):
-        try:
-            result = float(price.split('\xa0')[0])
-        except ValueError:
-            return None
-        return result
-
     # MARK: - Safe table access
 
     def __safe_sheet_method(self, method_name, *args, **kwargs):
