@@ -65,11 +65,14 @@ class MainWindowPresenter:
         )
         self.start_row_entry = tk.Entry(
             self.start_row_wrapper,
+            textvariable=tk.StringVar(self.start_row_wrapper, value='2'),
             width=START_ROW_ENTRY_WIDTH
         )
 
         start_button_command = lambda: self.__start_submit_thread(
-            action_handler.start_button_tapped
+            lambda: action_handler.start_button_tapped(
+                self.start_row_entry.get()
+            )
         )
         self.start_button = tk.Button(
             self.buttons_wrapper,

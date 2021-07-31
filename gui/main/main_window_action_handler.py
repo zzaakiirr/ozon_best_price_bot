@@ -21,7 +21,9 @@ class MainWindowActionHandler:
 
     # MARK: - Public methods
 
-    def start_button_tapped(self):
+    def start_button_tapped(self, start_row_number=1):
+        self.__update_start_index(start_row_number)
+ 
         self.sheet_redactor.set_initial_formatting({
             'backgroundColor': {
                 'red': 1,
@@ -55,6 +57,14 @@ class MainWindowActionHandler:
         update_prices_window_presenter.start()
 
     # MARK: - Private methods
+
+    def __update_start_index(self, start_row_number, default_number=1):
+        try:
+            start_row_number = int(start_row_number)
+        except ValueError:
+            start_row_number = default_number
+
+        self.sheet_redactor.start_index = start_row_number
 
     """
     Returns 2d array containing current price & best price for each URL
