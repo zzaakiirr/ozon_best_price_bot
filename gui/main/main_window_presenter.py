@@ -9,6 +9,7 @@ from gui.gui_config import (
   TEXT_BOX_BG_COLOR,
   TEXT_BOX_FG_COLOR,
   BUTTON_BG_COLOR,
+  START_ROW_LABEL_FONT,
   START_ROW_ENTRY_WIDTH,
   BUTTON_SIZE,
   VERTICAL_SPACE_BETWEEN_BUTTONS
@@ -61,7 +62,8 @@ class MainWindowPresenter:
 
         self.start_row_label = tk.Label(
             self.start_row_wrapper,
-            text=self.start_row_label_text
+            text=self.start_row_label_text,
+            font=START_ROW_LABEL_FONT
         )
         self.start_row_entry = tk.Entry(
             self.start_row_wrapper,
