@@ -65,22 +65,24 @@ class MainWindowActionHandler:
         means that 1st product has current price = 1 and best price = 2
                    2nd product has current price = 3 and best price = 4
     """
-    def __get_product_prices(self, product_url):
-        prices = []
-
+    def __get_product_prices(self, product_url, max_attempt_count=10):
         print(product_url)
 
-        soup = parse_html_as_soup(product_url)
-        if soup is None:
-            current_price, best_price = None, None
-        else:
-            current_price = self.__find_current_price(product_url)
+        prices = []
+        attempt = 0
+        current_price, best_price, new_price = None, None, None
+        # TODO: Implement helper method which runs something N times
+        while current_price is None and attempt < max_attempt_count:
+            soup = self.__parse_html_as_soup(product_url)
+            if soup is None:
+                continue
+
+            current_price = OzonParser.find_current_price(soup)
             best_price = OzonParser.find_best_price(soup)
+            attempt += 1
 
         if current_price and best_price and current_price > best_price:
             new_price = int(best_price) - 1
-        else:
-            new_price = None
 
         print(f'\t[INFO] Current price: {current_price}, ' \
               f'Best price: {best_price}\n')
@@ -89,21 +91,8 @@ class MainWindowActionHandler:
 
         return prices
 
-    # TODO: Implement helper method which runs something N times
-    def __find_current_price(self, product_url, max_attempt_count=10):
-        current_price = None
-        attempt = 0
-        while current_price is None and attempt < max_attempt_count:
-            soup = self.__parse_html_as_soup(product_url)
-            if soup is None:
-                continue
-
-            current_price = OzonParser.find_current_price(soup)
-            attempt += 1
-        return current_price
-
     def __parse_html_as_soup(self, product_url, max_attempt_count=10):
-        soup = parse_html_as_soup(product_url)
+        soup = None
         attempt = 0
         while 'name="robots"' in str(soup) or (soup is None and
                                                attempt < max_attempt_count):
