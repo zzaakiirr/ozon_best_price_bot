@@ -72,13 +72,15 @@ class OzonSheetRedactor:
     def get_product_urls(self):
         print('[INFO] Parsing URLs from sheet...')
         # First value is title of column
-        urls = self.__safe_sheet_method('col_values', self.urls_col_number)[1:]
+        col_values = self.__safe_sheet_method(
+            'col_values', self.urls_col_number
+        )
+        urls = col_values[self.start_index - 1:]
         print('[SUCCESS] Done!\n')
         return urls
 
     def get_products_for_price_updating(self):
         products = []
-        # First row is header
         product_rows = self.__safe_sheet_method('get_all_values')[1:]
 
         for product_row in product_rows:
@@ -101,17 +103,16 @@ class OzonSheetRedactor:
         return products
         
     def update_product_prices(self, prices, row_index, update_formatting=True):
-        try:
-            price_cell_range = f'{self.current_price_col}{row_index}:' \
-                               f'{self.new_price_col}{row_index + 1}'
-            self.__safe_sheet_method('update', price_cell_range, prices)
+        price_cell_range = f'{self.current_price_col}{row_index}:' \
+                           f'{self.new_price_col}{row_index + 1}'
+        self.__safe_sheet_method('update', price_cell_range, prices)
 
-            if update_formatting:
-                current_row_cell_range = f'{FIRST_CELL_LETTER}{row_index}:'\
-                                         f'{LAST_CELL_LETTER}{row_index}'
-                self.update_formatting(current_row_cell_range, prices)
-        except Exception as e:
-            print(f'[ERROR] Unexpected error: {e}')
+        if not update_formatting:
+            return
+
+        current_row_cell_range = f'{FIRST_CELL_LETTER}{row_index}:'\
+                                 f'{LAST_CELL_LETTER}{row_index}'
+        self.update_formatting(current_row_cell_range, prices)
 
     def set_initial_formatting(self, formatting):
         cell_range = f'{FIRST_CELL_LETTER}{self.start_index}:' \
