@@ -33,15 +33,9 @@ class MainWindowActionHandler:
         })
 
         product_urls = self.sheet_redactor.get_product_urls()
-        current_row_index = self.sheet_redactor.start_index - 1
+        current_row_index = self.sheet_redactor.start_index
 
         for product_url in product_urls:
-            current_row_index += 1
-
-            if 'http' not in product_url:
-                print(f'\n[ERROR] No schema supplied. URL: {product_url}')
-                continue
-
             product_prices = self.__get_product_prices(
                 product_url,
                 infinite_mode
@@ -51,6 +45,7 @@ class MainWindowActionHandler:
                 current_row_index,
                 update_formatting=True
             )
+            current_row_index += 1
 
         print('\n[INFO] Completed!\n')
 
@@ -74,20 +69,26 @@ class MainWindowActionHandler:
 
         self.sheet_redactor.start_index = start_row_number
 
-    """
-    Returns 2d array containing current price & best price for each URL
-        Example: [
-            [1, 2],
-            [3, 4]
-        ]
-        means that 1st product has current price = 1 and best price = 2
-                   2nd product has current price = 3 and best price = 4
-    """
+    
     def __get_product_prices(self,
                              product_url,
                              infinite_mode=False,
                              max_attempt_count=10):
+        """
+        Returns 2d array containing current price & best price for each URL
+            Example: [
+                [1, 2],
+                [3, 4]
+            ]
+            means that 1st product has current price = 1 and best price = 2
+                       2nd product has current price = 3 and best price = 4
+        """
         print(product_url)
+
+        if 'http' not in product_url:
+            print(f'\n[ERROR] No schema supplied. URL: {product_url}')
+            return None
+
         attempt = 0
         current_price, best_price, new_price = None, None, None
         # TODO: Implement helper method which runs something N times
@@ -99,7 +100,7 @@ class MainWindowActionHandler:
 
             html_text = str(soup).lower()
             if 'не существует' in html_text:
-                break
+                return None
 
             current_price = OzonParser.find_current_price(soup)
             best_price = OzonParser.find_best_price(soup)
