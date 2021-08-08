@@ -33,9 +33,15 @@ class MainWindowActionHandler:
         })
 
         product_urls = self.sheet_redactor.get_product_urls()
-        current_row_index = self.sheet_redactor.start_index
+        current_row_index = self.sheet_redactor.start_index - 1
 
         for product_url in product_urls:
+            current_row_index += 1
+
+            if 'http' not in product_url:
+                print(f'\n[ERROR] No schema supplied. URL: {product_url}')
+                continue
+
             product_prices = self.__get_product_prices(
                 product_url,
                 infinite_mode
@@ -45,7 +51,6 @@ class MainWindowActionHandler:
                 current_row_index,
                 update_formatting=True
             )
-            current_row_index += 1
 
         print('\n[INFO] Completed!\n')
 
