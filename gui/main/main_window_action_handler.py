@@ -48,15 +48,9 @@ class MainWindowActionHandler:
         })
 
         product_urls = self.sheet_redactor.get_product_urls()
-        self.current_row_index = self.sheet_redactor.start_index - 1
+        self.current_row_index = self.sheet_redactor.start_index
 
         for product_url in product_urls:
-            self.current_row_index += 1
-
-            if 'http' not in product_url:
-                print(f'\n[ERROR] No schema supplied. URL: {product_url}')
-                continue
-
             product_prices = self.__get_product_prices(
                 product_url,
                 infinite_mode
@@ -66,6 +60,7 @@ class MainWindowActionHandler:
                 self.current_row_index,
                 update_formatting=True
             )
+            self.current_row_index += 1
 
         print('\n[INFO] Completed!\n')
 
@@ -97,7 +92,7 @@ class MainWindowActionHandler:
         self.settings.set(
             'ozon_sheet_redactor',
             'start_index',
-            str(self.current_row_index + 1)
+            str(self.current_row_index)
         )
         with open(SETTINGS_FILE_PATH, 'w') as settings_file:
             self.settings.write(settings_file)
@@ -116,6 +111,11 @@ class MainWindowActionHandler:
                        2nd product has current price = 3 and best price = 4
         """
         print(product_url)
+
+        if 'http' not in product_url:
+            print(f'\n[ERROR] No schema supplied. URL: {product_url}')
+            return None
+
         attempt = 0
         current_price, best_price, new_price = None, None, None
         # TODO: Implement helper method which runs something N times
@@ -127,7 +127,7 @@ class MainWindowActionHandler:
 
             html_text = str(soup).lower()
             if 'не существует' in html_text:
-                break
+                return None
 
             current_price = OzonParser.find_current_price(soup)
             best_price = OzonParser.find_best_price(soup)
