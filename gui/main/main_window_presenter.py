@@ -31,6 +31,7 @@ class MainWindowPresenter:
                  start_button_text='Start',
                  infinite_mode_text='Infinite mode',
                  start_row_label_text='Start from row:',
+                 start_row_entry_text='2',
                  get_new_prices_button_text='Get new prices',
                  exit_button_text='Exit'):
 
@@ -38,6 +39,7 @@ class MainWindowPresenter:
         self.start_button_text = start_button_text
         self.infinite_mode_text = infinite_mode_text
         self.start_row_label_text = start_row_label_text
+        self.start_row_entry_text = start_row_entry_text
         self.get_new_prices_button_text = get_new_prices_button_text
         self.exit_button_text = exit_button_text
 
@@ -75,7 +77,7 @@ class MainWindowPresenter:
         )
 
         sys.stdout = StdoutRedirector(self.text_box)
-        action_handler = MainWindowActionHandler(self.window)
+        self.action_handler = MainWindowActionHandler(self.window)
 
         self.infinite_mode = tk.IntVar()
         self.infinite_mode_checkbox = tk.Checkbutton(
@@ -88,7 +90,7 @@ class MainWindowPresenter:
             self.infinite_mode_wrapper,
             bg=SIDEBAR_BG_COLOR
         )
-        self.inf_mode_gif_frames = [
+        self.infinite_mode_gif_frames = [
             tk.PhotoImage(file=INF_MODE_FILE, format=f'gif -index {frame}')
             for frame in range(INF_MODE_GIF_FRAMES_COUNT)
         ]
@@ -99,16 +101,21 @@ class MainWindowPresenter:
             bg=SIDEBAR_BG_COLOR,
             fg=START_ROW_LABEL_FG_COLOR
         )
+        start_row_entry_var = tk.StringVar(
+            self.start_row_wrapper,
+            # FIXME: SOLID principle!
+            value=self.action_handler.sheet_redactor.start_index,
+        )
         self.start_row_entry = tk.Entry(
             self.start_row_wrapper,
-            textvariable=tk.StringVar(self.start_row_wrapper, value='2'),
+            textvariable=start_row_entry_var,
             width=START_ROW_ENTRY['width'],
             bg=START_ROW_ENTRY['bg_color'],
             fg=START_ROW_ENTRY['fg_color']
         )
 
         start_button_command = lambda: self.__start_submit_thread(
-            lambda: action_handler.start_button_tapped(
+            lambda: self.action_handler.start_button_tapped(
                 self.start_row_entry.get(),
                 self.infinite_mode.get()
             )
@@ -124,7 +131,7 @@ class MainWindowPresenter:
         )
 
         get_new_prices_button_command = lambda: self.__start_submit_thread(
-            action_handler.get_new_prices_button_tapped
+            self.action_handler.get_new_prices_button_tapped
         )
         self.get_new_prices_button = tk.Button(
             self.buttons_wrapper,
@@ -139,7 +146,7 @@ class MainWindowPresenter:
         self.exit_button = tk.Button(
             self.buttons_wrapper,
             text=self.exit_button_text,
-            command=self.window.destroy,
+            command=self.action_handler.on_exit,
             width=BUTTON_SIZE['width'],
             height=BUTTON_SIZE['height'],
             bg=BUTTON_BG_COLOR,
@@ -150,11 +157,12 @@ class MainWindowPresenter:
         self.window.title(title)
         self.window.configure(bg=SIDEBAR_BG_COLOR)
         self.window.resizable(False, False)
+        self.window.protocol('WM_DELETE_WINDOW', self.action_handler.on_exit)
 
     def __configure_infinite_mode_gif(self):
         self.infinite_mode_wrapper.after(
             0, gui_helpers.update_frames, 0,
-            self.inf_mode_gif_frames,
+            self.infinite_mode_gif_frames,
             self.infinite_mode_label,
             self.infinite_mode_wrapper,
         )
