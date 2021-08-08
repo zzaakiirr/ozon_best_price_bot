@@ -9,8 +9,9 @@ from gui.gui_config import (
   TEXT_BOX_BG_COLOR,
   TEXT_BOX_FG_COLOR,
   BUTTON_BG_COLOR,
-  START_ROW_LABEL_FONT,
-  START_ROW_ENTRY_WIDTH,
+  BUTTON_FG_COLOR,
+  START_ROW_LABEL_FG_COLOR,
+  START_ROW_ENTRY,
   BUTTON_SIZE,
   VERTICAL_SPACE_BETWEEN_BUTTONS
 )
@@ -48,8 +49,14 @@ class MainWindowPresenter:
     def __init_ui_elements(self):
         self.window = tk.Tk()
         self.sidebar_frame = tk.Frame(self.window, bg=SIDEBAR_BG_COLOR)
-        self.start_row_wrapper = tk.Frame(self.sidebar_frame)
-        self.buttons_wrapper = tk.Frame(self.sidebar_frame)
+        self.start_row_wrapper = tk.Frame(
+            self.sidebar_frame,
+            bg=SIDEBAR_BG_COLOR
+        )
+        self.buttons_wrapper = tk.Frame(
+            self.sidebar_frame,
+            bg=SIDEBAR_BG_COLOR
+        )
         self.text_box = tk.Text(
             master=self.window,
             state='disabled',
@@ -63,12 +70,15 @@ class MainWindowPresenter:
         self.start_row_label = tk.Label(
             self.start_row_wrapper,
             text=self.start_row_label_text,
-            font=START_ROW_LABEL_FONT
+            bg=SIDEBAR_BG_COLOR,
+            fg=START_ROW_LABEL_FG_COLOR
         )
         self.start_row_entry = tk.Entry(
             self.start_row_wrapper,
             textvariable=tk.StringVar(self.start_row_wrapper, value='2'),
-            width=START_ROW_ENTRY_WIDTH
+            width=START_ROW_ENTRY['width'],
+            bg=START_ROW_ENTRY['bg_color'],
+            fg=START_ROW_ENTRY['fg_color']
         )
 
         start_button_command = lambda: self.__start_submit_thread(
@@ -82,7 +92,8 @@ class MainWindowPresenter:
             command=start_button_command,
             width=BUTTON_SIZE['width'],
             height=BUTTON_SIZE['height'],
-            bg=BUTTON_BG_COLOR
+            bg=BUTTON_BG_COLOR,
+            fg=BUTTON_FG_COLOR
         )
 
         get_new_prices_button_command = lambda: self.__start_submit_thread(
@@ -94,7 +105,8 @@ class MainWindowPresenter:
             command=get_new_prices_button_command,
             width=BUTTON_SIZE['width'],
             height=BUTTON_SIZE['height'],
-            bg=BUTTON_BG_COLOR
+            bg=BUTTON_BG_COLOR,
+            fg=BUTTON_FG_COLOR
         )
 
         self.exit_button = tk.Button(
@@ -103,7 +115,8 @@ class MainWindowPresenter:
             command=self.window.destroy,
             width=BUTTON_SIZE['width'],
             height=BUTTON_SIZE['height'],
-            bg=BUTTON_BG_COLOR
+            bg=BUTTON_BG_COLOR,
+            fg=BUTTON_FG_COLOR
         )
 
     def __configure_window(self, title):
