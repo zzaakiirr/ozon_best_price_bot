@@ -21,7 +21,7 @@ class MainWindowActionHandler:
 
     # MARK: - Public methods
 
-    def start_button_tapped(self, start_row_number=1):
+    def start_button_tapped(self, start_row_number=1, infinite_mode=False):
         self.__update_start_index(start_row_number)
  
         self.sheet_redactor.set_initial_formatting({
@@ -36,7 +36,10 @@ class MainWindowActionHandler:
         current_row_index = self.sheet_redactor.start_index
 
         for product_url in product_urls:
-            product_prices = self.__get_product_prices(product_url)
+            product_prices = self.__get_product_prices(
+                product_url,
+                infinite_mode
+            )
             self.sheet_redactor.update_product_prices(
                 product_prices,
                 current_row_index,
@@ -75,17 +78,23 @@ class MainWindowActionHandler:
         means that 1st product has current price = 1 and best price = 2
                    2nd product has current price = 3 and best price = 4
     """
-    def __get_product_prices(self, product_url, max_attempt_count=10):
+    def __get_product_prices(self,
+                             product_url,
+                             infinite_mode=False,
+                             max_attempt_count=10):
         print(product_url)
-
-        prices = []
         attempt = 0
         current_price, best_price, new_price = None, None, None
         # TODO: Implement helper method which runs something N times
-        while current_price is None and attempt < max_attempt_count:
+        while current_price is None and (
+              attempt < max_attempt_count or infinite_mode):
             soup = self.__parse_html_as_soup(product_url)
             if soup is None:
                 continue
+
+            html_text = str(soup).lower()
+            if 'не существует' in html_text:
+                break
 
             current_price = OzonParser.find_current_price(soup)
             best_price = OzonParser.find_best_price(soup)
@@ -97,17 +106,15 @@ class MainWindowActionHandler:
         print(f'\t[INFO] Current price: {current_price}, ' \
               f'Best price: {best_price}\n')
 
-        prices.append([current_price, best_price, new_price])
-
-        return prices
+        return [[current_price, best_price, new_price]]
 
     def __parse_html_as_soup(self, product_url, max_attempt_count=10):
-        soup = None
+        soup = parse_html_as_soup(product_url)
         attempt = 0
-        while 'name="robots"' in str(soup) or (soup is None and
-                                               attempt < max_attempt_count):
-            print('[WARNING] Bot was spotted. Trying again...')
-            time.sleep(0.5)
+        while ('name="robots"' in str(soup).lower() or soup is None) and (
+               attempt < max_attempt_count):
+            print('[WARNING] Bot was spotted. Trying again after 30 seconds')
+            time.sleep(30)
             soup = parse_html_as_soup(product_url)
             attempt += 1
         return soup
