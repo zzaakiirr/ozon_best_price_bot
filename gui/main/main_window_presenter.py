@@ -77,9 +77,11 @@ class MainWindowPresenter:
         sys.stdout = StdoutRedirector(self.text_box)
         action_handler = MainWindowActionHandler(self.window)
 
+        self.infinite_mode = tk.IntVar()
         self.infinite_mode_checkbox = tk.Checkbutton(
             self.infinite_mode_wrapper,
             text = self.infinite_mode_text,
+            variable=self.infinite_mode,
             bg=SIDEBAR_BG_COLOR
         )
         self.infinite_mode_label = tk.Label(
@@ -107,7 +109,8 @@ class MainWindowPresenter:
 
         start_button_command = lambda: self.__start_submit_thread(
             lambda: action_handler.start_button_tapped(
-                self.start_row_entry.get()
+                self.start_row_entry.get(),
+                self.infinite_mode.get()
             )
         )
         self.start_button = tk.Button(
