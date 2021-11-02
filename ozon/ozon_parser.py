@@ -27,15 +27,15 @@ class OzonParser:
     def find_best_price(cls, soup, target_str=BEST_PRICE_STR):
         print('\t[INFO] Searching for best price...')
 
-        target_divs = soup.find_all('div', class_='kxa6')
+        target_tags = soup.find_all('span', class_='_i_J')
 
-        for target_div in target_divs:
-            if len(target_div.contents):
-                div_text = target_div.contents[0]
+        for target_tag in target_tags:
+            if len(target_tag.contents):
+                tag_text = target_tag.contents[0]
             else:
-                div_text = ''
-            if target_str in div_text:
-                _, best_price = div_text.split(', ')
+                tag_text = ''
+            if target_str in tag_text:
+                _, best_price = tag_text.split(', ')
 
                 print('\t[SUCCESS] Done!\n')
                 return best_price[:-1]
