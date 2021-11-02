@@ -1,4 +1,5 @@
 import time
+import configparser
 
 from ozon.ozon_parser import OzonParser
 from google_sheets.ozon_sheet_redactor import OzonSheetRedactor
@@ -9,19 +10,33 @@ from gui.update_prices.update_prices_window_presenter import (
 )
 
 
+SETTINGS_FILE_PATH = 'settings.ini'
+
+
 # MARK: - Main classes
 
 class MainWindowActionHandler:
 
     # MARK: - Init
 
-    def __init__(self, window):
+    def __init__(self, window, settings_file_path=SETTINGS_FILE_PATH):
         self.window = window
-        self.sheet_redactor = OzonSheetRedactor()
+
+        self.settings = configparser.ConfigParser()
+        self.settings.read(settings_file_path)
+        sheet_start_index = self.settings.getint(
+            'ozon_sheet_redactor',
+            'start_index',
+        )
+
+        self.sheet_redactor = OzonSheetRedactor(
+            start_index=sheet_start_index
+        )
+        self.current_row_index = self.sheet_redactor.start_index - 1
 
     # MARK: - Public methods
 
-    def start_button_tapped(self, start_row_number=1):
+    def start_button_tapped(self, start_row_number=1, infinite_mode=False):
         self.__update_start_index(start_row_number)
  
         self.sheet_redactor.set_initial_formatting({
@@ -33,16 +48,19 @@ class MainWindowActionHandler:
         })
 
         product_urls = self.sheet_redactor.get_product_urls()
-        current_row_index = self.sheet_redactor.start_index
+        self.current_row_index = self.sheet_redactor.start_index
 
         for product_url in product_urls:
-            product_prices = self.__get_product_prices(product_url)
+            product_prices = self.__get_product_prices(
+                product_url,
+                infinite_mode
+            )
             self.sheet_redactor.update_product_prices(
                 product_prices,
-                current_row_index,
+                self.current_row_index,
                 update_formatting=True
             )
-            current_row_index += 1
+            self.current_row_index += 1
 
         print('\n[INFO] Completed!\n')
 
@@ -56,6 +74,10 @@ class MainWindowActionHandler:
         )
         update_prices_window_presenter.start()
 
+    def on_exit(self):
+        self.__update_settings()
+        self.window.destroy()
+
     # MARK: - Private methods
 
     def __update_start_index(self, start_row_number, default_number=1):
@@ -66,26 +88,46 @@ class MainWindowActionHandler:
 
         self.sheet_redactor.start_index = start_row_number
 
-    """
-    Returns 2d array containing current price & best price for each URL
-        Example: [
-            [1, 2],
-            [3, 4]
-        ]
-        means that 1st product has current price = 1 and best price = 2
-                   2nd product has current price = 3 and best price = 4
-    """
-    def __get_product_prices(self, product_url, max_attempt_count=10):
+    def __update_settings(self):
+        self.settings.set(
+            'ozon_sheet_redactor',
+            'start_index',
+            str(self.current_row_index)
+        )
+        with open(SETTINGS_FILE_PATH, 'w') as settings_file:
+            self.settings.write(settings_file)
+
+    def __get_product_prices(self,
+                             product_url,
+                             infinite_mode=False,
+                             max_attempt_count=10):
+        """
+        Returns 2d array containing current price & best price for each URL
+            Example: [
+                [1, 2],
+                [3, 4]
+            ]
+            means that 1st product has current price = 1 and best price = 2
+                       2nd product has current price = 3 and best price = 4
+        """
         print(product_url)
 
-        prices = []
+        if 'http' not in product_url:
+            print(f'\n[ERROR] No schema supplied. URL: {product_url}')
+            return None
+
         attempt = 0
         current_price, best_price, new_price = None, None, None
         # TODO: Implement helper method which runs something N times
-        while current_price is None and attempt < max_attempt_count:
+        while current_price is None and (
+              attempt < max_attempt_count or infinite_mode):
             soup = self.__parse_html_as_soup(product_url)
             if soup is None:
                 continue
+
+            html_text = str(soup).lower()
+            if 'не существует' in html_text:
+                return None
 
             current_price = OzonParser.find_current_price(soup)
             best_price = OzonParser.find_best_price(soup)
@@ -97,17 +139,15 @@ class MainWindowActionHandler:
         print(f'\t[INFO] Current price: {current_price}, ' \
               f'Best price: {best_price}\n')
 
-        prices.append([current_price, best_price, new_price])
-
-        return prices
+        return [[current_price, best_price, new_price]]
 
     def __parse_html_as_soup(self, product_url, max_attempt_count=10):
-        soup = None
+        soup = parse_html_as_soup(product_url)
         attempt = 0
-        while 'name="robots"' in str(soup) or (soup is None and
-                                               attempt < max_attempt_count):
-            print('[WARNING] Bot was spotted. Trying again...')
-            time.sleep(0.5)
+        while ('name="robots"' in str(soup).lower() or soup is None) and (
+               attempt < max_attempt_count):
+            print('[WARNING] Bot was spotted. Trying again after 30 seconds')
+            time.sleep(10)
             soup = parse_html_as_soup(product_url)
             attempt += 1
         return soup

@@ -89,7 +89,7 @@ class OzonSheetRedactor:
             new_price = product_row[self.new_price_col_number - 1]
 
             if not product_id or not new_price:
-                continue 
+                continue
 
             try:
                 products.append({
@@ -101,7 +101,7 @@ class OzonSheetRedactor:
                 pass
 
         return products
-        
+
     def update_product_prices(self, prices, row_index, update_formatting=True):
         price_cell_range = f'{self.current_price_col}{row_index}:' \
                            f'{self.new_price_col}{row_index + 1}'
