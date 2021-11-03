@@ -11,7 +11,7 @@ from gui.update_prices.update_prices_window_presenter import (
 
 
 SETTINGS_FILE_PATH = 'settings.ini'
-
+DEFAULT_TARGET_TAG_ATTRS = 'span,_i_J'
 
 # MARK: - Main classes
 
@@ -27,18 +27,29 @@ class MainWindowActionHandler:
         sheet_start_index = self.settings.getint(
             'ozon_sheet_redactor',
             'start_index',
+            fallback=2
+        )
+        target_tag_attrs = self.settings.get(
+            'ozon_parser',
+            'target_tag_attrs',
+            fallback=DEFAULT_TARGET_TAG_ATTRS
         )
 
         self.sheet_redactor = OzonSheetRedactor(
             start_index=sheet_start_index
         )
         self.current_row_index = self.sheet_redactor.start_index - 1
+        # TODO: Move to OzonParser
+        self.target_tag_attrs = target_tag_attrs
 
     # MARK: - Public methods
 
-    def start_button_tapped(self, start_row_number=1, infinite_mode=False):
+    def start_button_tapped(self,
+                            target_tag_attrs,
+                            start_row_number=1,
+                            infinite_mode=False):
         self.__update_start_index(start_row_number)
- 
+
         self.sheet_redactor.set_initial_formatting({
             'backgroundColor': {
                 'red': 1,
@@ -49,10 +60,12 @@ class MainWindowActionHandler:
 
         product_urls = self.sheet_redactor.get_product_urls()
         self.current_row_index = self.sheet_redactor.start_index
+        self.target_tag_attrs = target_tag_attrs
 
         for product_url in product_urls:
             product_prices = self.__get_product_prices(
                 product_url,
+                self.target_tag_attrs,
                 infinite_mode
             )
             self.sheet_redactor.update_product_prices(
@@ -94,6 +107,11 @@ class MainWindowActionHandler:
             'start_index',
             str(self.current_row_index)
         )
+        self.settings.set(
+            'ozon_parser',
+            'target_tag_attrs',
+            self.target_tag_attrs
+        )
         with open(SETTINGS_FILE_PATH, 'w') as settings_file:
             self.settings.write(settings_file)
 
@@ -130,7 +148,7 @@ class MainWindowActionHandler:
                 return None
 
             current_price = OzonParser.find_current_price(soup)
-            best_price = OzonParser.find_best_price(soup)
+            best_price = OzonParser.find_best_price(soup, self.target_tag_attrs)
             attempt += 1
 
         if current_price and best_price and current_price > best_price:
