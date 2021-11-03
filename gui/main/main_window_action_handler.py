@@ -1,4 +1,5 @@
 import time
+import configparser
 
 from ozon.ozon_parser import OzonParser
 from google_sheets.ozon_sheet_redactor import OzonSheetRedactor
@@ -9,21 +10,46 @@ from gui.update_prices.update_prices_window_presenter import (
 )
 
 
+SETTINGS_FILE_PATH = 'settings.ini'
+DEFAULT_TARGET_TAG_ATTRS = 'span,_i_J'
+
 # MARK: - Main classes
 
 class MainWindowActionHandler:
 
     # MARK: - Init
 
-    def __init__(self, window):
+    def __init__(self, window, settings_file_path=SETTINGS_FILE_PATH):
         self.window = window
-        self.sheet_redactor = OzonSheetRedactor()
+
+        self.settings = configparser.ConfigParser()
+        self.settings.read(settings_file_path)
+        sheet_start_index = self.settings.getint(
+            'ozon_sheet_redactor',
+            'start_index',
+            fallback=2
+        )
+        target_tag_attrs = self.settings.get(
+            'ozon_parser',
+            'target_tag_attrs',
+            fallback=DEFAULT_TARGET_TAG_ATTRS
+        )
+
+        self.sheet_redactor = OzonSheetRedactor(
+            start_index=sheet_start_index
+        )
+        self.current_row_index = self.sheet_redactor.start_index - 1
+        # TODO: Move to OzonParser
+        self.target_tag_attrs = target_tag_attrs
 
     # MARK: - Public methods
 
-    def start_button_tapped(self, start_row_number=1, infinite_mode=False):
+    def start_button_tapped(self,
+                            target_tag_attrs,
+                            start_row_number=1,
+                            infinite_mode=False):
         self.__update_start_index(start_row_number)
- 
+
         self.sheet_redactor.set_initial_formatting({
             'backgroundColor': {
                 'red': 1,
@@ -33,19 +59,21 @@ class MainWindowActionHandler:
         })
 
         product_urls = self.sheet_redactor.get_product_urls()
-        current_row_index = self.sheet_redactor.start_index
+        self.current_row_index = self.sheet_redactor.start_index
+        self.target_tag_attrs = target_tag_attrs
 
         for product_url in product_urls:
             product_prices = self.__get_product_prices(
                 product_url,
+                self.target_tag_attrs,
                 infinite_mode
             )
             self.sheet_redactor.update_product_prices(
                 product_prices,
-                current_row_index,
+                self.current_row_index,
                 update_formatting=True
             )
-            current_row_index += 1
+            self.current_row_index += 1
 
         print('\n[INFO] Completed!\n')
 
@@ -59,6 +87,10 @@ class MainWindowActionHandler:
         )
         update_prices_window_presenter.start()
 
+    def on_exit(self):
+        self.__update_settings()
+        self.window.destroy()
+
     # MARK: - Private methods
 
     def __update_start_index(self, start_row_number, default_number=1):
@@ -69,7 +101,20 @@ class MainWindowActionHandler:
 
         self.sheet_redactor.start_index = start_row_number
 
-    
+    def __update_settings(self):
+        self.settings.set(
+            'ozon_sheet_redactor',
+            'start_index',
+            str(self.current_row_index)
+        )
+        self.settings.set(
+            'ozon_parser',
+            'target_tag_attrs',
+            self.target_tag_attrs
+        )
+        with open(SETTINGS_FILE_PATH, 'w') as settings_file:
+            self.settings.write(settings_file)
+
     def __get_product_prices(self,
                              product_url,
                              infinite_mode=False,
@@ -103,7 +148,7 @@ class MainWindowActionHandler:
                 return None
 
             current_price = OzonParser.find_current_price(soup)
-            best_price = OzonParser.find_best_price(soup)
+            best_price = OzonParser.find_best_price(soup, self.target_tag_attrs)
             attempt += 1
 
         if current_price and best_price and current_price > best_price:
@@ -120,7 +165,7 @@ class MainWindowActionHandler:
         while ('name="robots"' in str(soup).lower() or soup is None) and (
                attempt < max_attempt_count):
             print('[WARNING] Bot was spotted. Trying again after 30 seconds')
-            time.sleep(30)
+            time.sleep(10)
             soup = parse_html_as_soup(product_url)
             attempt += 1
         return soup

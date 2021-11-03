@@ -7,9 +7,15 @@ BUTTON_BG_COLOR = '#909090'
 BUTTON_FG_COLOR = '#FFF'
 
 START_ROW_LABEL_FG_COLOR = '#FFF'
-
 START_ROW_ENTRY = {
-    'width': 5,
+    'width': 8,
+    'bg_color': '#000',
+    'fg_color': '#FFF'
+}
+
+PRICE_TAG_CLASS_ROW_LABEL_FG_COLOR = '#FFF'
+PRICE_TAG_CLASS_ROW_ENTRY = {
+    'width': 8,
     'bg_color': '#000',
     'fg_color': '#FFF'
 }
