@@ -13,6 +13,8 @@ from gui.gui_config import (
   BUTTON_FG_COLOR,
   START_ROW_LABEL_FG_COLOR,
   START_ROW_ENTRY,
+  PRICE_TAG_CLASS_ROW_LABEL_FG_COLOR,
+  PRICE_TAG_CLASS_ROW_ENTRY,
   BUTTON_SIZE,
   VERTICAL_SPACE_BETWEEN_BUTTONS,
   INF_MODE_FILE,
@@ -31,7 +33,8 @@ class MainWindowPresenter:
                  start_button_text='Start',
                  infinite_mode_text='Infinite mode',
                  start_row_label_text='Start from row:',
-                 start_row_entry_text='2',
+                 best_price_tag_attrs_label_text='Price tag class:',
+                 best_price_tag_row_entry_text='span,_i_J',
                  get_new_prices_button_text='Get new prices',
                  exit_button_text='Exit'):
 
@@ -39,7 +42,8 @@ class MainWindowPresenter:
         self.start_button_text = start_button_text
         self.infinite_mode_text = infinite_mode_text
         self.start_row_label_text = start_row_label_text
-        self.start_row_entry_text = start_row_entry_text
+        self.best_price_tag_attrs_label_text = best_price_tag_attrs_label_text
+        self.best_price_tag_row_entry_text = best_price_tag_row_entry_text
         self.get_new_prices_button_text = get_new_prices_button_text
         self.exit_button_text = exit_button_text
 
@@ -62,6 +66,10 @@ class MainWindowPresenter:
             bg=SIDEBAR_BG_COLOR
         )
         self.start_row_wrapper = tk.Frame(
+            self.sidebar_frame,
+            bg=SIDEBAR_BG_COLOR
+        )
+        self.best_price_tag_attrs_row_wrapper = tk.Frame(
             self.sidebar_frame,
             bg=SIDEBAR_BG_COLOR
         )
@@ -114,8 +122,28 @@ class MainWindowPresenter:
             fg=START_ROW_ENTRY['fg_color']
         )
 
+        self.best_price_tag_attrs_row_label = tk.Label(
+            self.best_price_tag_attrs_row_wrapper,
+            text=self.best_price_tag_attrs_label_text,
+            bg=SIDEBAR_BG_COLOR,
+            fg=PRICE_TAG_CLASS_ROW_LABEL_FG_COLOR
+        )
+        best_price_tag_attrs_row_entry_var = tk.StringVar(
+            self.best_price_tag_attrs_row_wrapper,
+            # FIXME: SOLID principle!
+            value=self.action_handler.target_tag_attrs,
+        )
+        self.best_price_tag_attrs_row_entry = tk.Entry(
+            self.best_price_tag_attrs_row_wrapper,
+            textvariable=best_price_tag_attrs_row_entry_var,
+            width=PRICE_TAG_CLASS_ROW_ENTRY['width'],
+            bg=PRICE_TAG_CLASS_ROW_ENTRY['bg_color'],
+            fg=PRICE_TAG_CLASS_ROW_ENTRY['fg_color']
+        )
+
         start_button_command = lambda: self.__start_submit_thread(
             lambda: self.action_handler.start_button_tapped(
+                self.best_price_tag_attrs_row_entry.get(),
                 self.start_row_entry.get(),
                 self.infinite_mode.get()
             )
@@ -173,6 +201,7 @@ class MainWindowPresenter:
         self.__pack_base_elements()
         self.__pack_infinite_mode_element()
         self.__pack_start_row_elements()
+        self.__pack_best_price_tag_attrs_row_elements()
         self.__pack_buttons()
 
     def __pack_base_elements(self, sidebar_side=tk.LEFT, text_side=tk.RIGHT):
@@ -188,6 +217,11 @@ class MainWindowPresenter:
         self.start_row_wrapper.pack()
         self.start_row_label.pack(side=tk.LEFT)
         self.start_row_entry.pack()
+
+    def __pack_best_price_tag_attrs_row_elements(self):
+        self.best_price_tag_attrs_row_wrapper.pack()
+        self.best_price_tag_attrs_row_label.pack(side=tk.LEFT)
+        self.best_price_tag_attrs_row_entry.pack()
 
     def __pack_buttons(self):
         self.buttons_wrapper.pack()

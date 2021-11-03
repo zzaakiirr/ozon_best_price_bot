@@ -2,6 +2,7 @@
 
 BEST_PRICE_STR = 'Есть дешевле, '
 CURRENT_PRICE_STR = '\"finalPrice\"'
+TARGET_TAG_ATTRS = 'span,_i_J'
 
 # MARK: - Main classes
 
@@ -24,10 +25,14 @@ class OzonParser:
         return f'{current_price}'
 
     @classmethod
-    def find_best_price(cls, soup, target_str=BEST_PRICE_STR):
+    def find_best_price(cls,
+                        soup,
+                        target_tag_attrs=TARGET_TAG_ATTRS,
+                        target_str=BEST_PRICE_STR):
         print('\t[INFO] Searching for best price...')
 
-        target_tags = soup.find_all('span', class_='_i_J')
+        target_tag_name, target_tag_class = target_tag_attrs.split(',')
+        target_tags = soup.find_all(target_tag_name, class_=target_tag_class)
 
         for target_tag in target_tags:
             if len(target_tag.contents):
